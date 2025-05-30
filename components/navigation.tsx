@@ -5,7 +5,20 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Menu, Home, Search, MessageSquare, User, Settings, LogOut } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import {
+  Bell,
+  Menu,
+  Home,
+  ShoppingCart,
+  Package,
+  MessageSquare,
+  Users,
+  CreditCard,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SimpleSheet, SimpleSheetTrigger } from "@/components/ui/simple-sheet"
 import { SimpleDropdown, SimpleDropdownItem, SimpleDropdownSeparator } from "@/components/ui/simple-dropdown"
@@ -21,9 +34,14 @@ export function Navigation() {
       icon: Home,
     },
     {
-      name: "Browse",
-      path: "/browse",
-      icon: Search,
+      name: "Demand",
+      path: "/demand",
+      icon: ShoppingCart,
+    },
+    {
+      name: "Supply",
+      path: "/supply",
+      icon: Package,
     },
     {
       name: "Messages",
@@ -31,9 +49,14 @@ export function Navigation() {
       icon: MessageSquare,
     },
     {
-      name: "Profile",
-      path: "/profile",
-      icon: User,
+      name: "Connects",
+      path: "/connects",
+      icon: Users,
+    },
+    {
+      name: "Manage Credits",
+      path: "/buy-credits",
+      icon: CreditCard,
     },
   ]
 
@@ -93,7 +116,18 @@ export function Navigation() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
+          <div className="flex items-center gap-2 mr-2">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              Credits: 150
+            </Badge>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => (window.location.href = "/notifications")}
+          >
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
             <span className="sr-only">Notifications</span>
@@ -115,9 +149,9 @@ export function Navigation() {
               <User className="mr-2 h-4 w-4" />
               Profile
             </SimpleDropdownItem>
-            <SimpleDropdownItem onClick={() => (window.location.href = "/settings")}>
+            <SimpleDropdownItem onClick={() => (window.location.href = "/preferences")}>
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              Preferences
             </SimpleDropdownItem>
             <SimpleDropdownSeparator />
             <SimpleDropdownItem onClick={() => (window.location.href = "/login")}>

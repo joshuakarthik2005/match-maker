@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, ShoppingCart, Package, ChevronRight } from "lucide-react"
+import { Navigation } from "@/components/navigation"
+import { ShoppingCart, Package, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
@@ -42,18 +43,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-4 py-3">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="mr-3">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold">Dashboard</h1>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="p-4 space-y-6">
         <div className="space-y-2 fade-in">
-          <h2 className="text-2xl font-bold">Hello</h2>
+          <h2 className="text-2xl font-bold">Hello {userName}</h2>
           <p className="text-gray-600">What would you like to do today?</p>
         </div>
 

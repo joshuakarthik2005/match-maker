@@ -6,30 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import {
-  Search,
-  Plus,
-  Clock,
-  DollarSign,
-  MapPin,
-  Filter,
-  TrendingUp,
-  Users,
-  Star,
-  ArrowRight,
-  Briefcase,
-  Home,
-  Wrench,
-  Laptop,
-  Heart,
-  Scale,
-} from "lucide-react"
+import { Search, Plus, Clock, DollarSign, MapPin, Filter, TrendingUp, Users, Star, MessageCircle } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
 
 export default function DemandPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("browse")
   const [searchQuery, setSearchQuery] = useState("")
 
   // Mock data for active demands
@@ -72,15 +54,6 @@ export default function DemandPage() {
     },
   ]
 
-  const categories = [
-    { name: "Home Services", icon: Home, count: 234, color: "bg-blue-500" },
-    { name: "Technology", icon: Laptop, count: 189, color: "bg-purple-500" },
-    { name: "Professional Services", icon: Briefcase, count: 156, color: "bg-green-500" },
-    { name: "Repair & Maintenance", icon: Wrench, count: 98, color: "bg-orange-500" },
-    { name: "Healthcare", icon: Heart, count: 67, color: "bg-red-500" },
-    { name: "Legal Services", icon: Scale, count: 45, color: "bg-indigo-500" },
-  ]
-
   const trendingDemands = [
     "Web Development",
     "Plumbing Services",
@@ -105,14 +78,25 @@ export default function DemandPage() {
                   Post your requirements and connect with verified suppliers
                 </p>
               </div>
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => router.push("/create-request")}
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Create New Request
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-primary/10 hover:bg-primary/20"
+                  onClick={() => router.push("/chatbot")}
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  Chat Assistant
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => router.push("/create-request")}
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Create New Request
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -205,33 +189,6 @@ export default function DemandPage() {
                 </CardContent>
               </Card>
 
-              {/* Categories Grid */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Browse by Category</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {categories.map((category) => (
-                      <div
-                        key={category.name}
-                        className="flex items-center p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                        onClick={() => router.push(`/browse?category=${category.name.toLowerCase()}`)}
-                      >
-                        <div className={`p-3 rounded-lg ${category.color} mr-4`}>
-                          <category.icon className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{category.name}</h3>
-                          <p className="text-sm text-muted-foreground">{category.count} active requests</p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Your Active Requests */}
               <Card>
                 <CardHeader>
@@ -284,7 +241,9 @@ export default function DemandPage() {
                             <Button variant="outline" size="sm">
                               Edit
                             </Button>
-                            <Button size="sm">View Responses</Button>
+                            <Button size="sm" onClick={() => router.push(`/matches/${demand.id}`)}>
+                              View Matches
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -310,7 +269,7 @@ export default function DemandPage() {
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Request
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => router.push("/browse")}>
+                  <Button className="w-full justify-start" variant="outline" onClick={() => router.push("/supply")}>
                     <Search className="h-4 w-4 mr-2" />
                     Browse Suppliers
                   </Button>

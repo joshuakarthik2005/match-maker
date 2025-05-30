@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -21,13 +19,13 @@ import {
   Edit,
   MoreHorizontal,
   ArrowRight,
+  MessageCircle,
 } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
 
 export default function SupplyPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("overview")
 
   // Mock data for user's listings
   const myListings = [
@@ -121,14 +119,25 @@ export default function SupplyPage() {
                 <h1 className="text-4xl font-bold tracking-tight mb-2">Supplier Dashboard</h1>
                 <p className="text-xl text-muted-foreground">Manage your services and connect with buyers</p>
               </div>
-              <Button
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => router.push("/create-listing")}
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Create New Listing
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-primary/10 hover:bg-primary/20"
+                  onClick={() => router.push("/chatbot")}
+                >
+                  <MessageCircle className="h-5 w-5 mr-2" />
+                  Chat Assistant
+                </Button>
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => router.push("/create-listing")}
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Create New Listing
+                </Button>
+              </div>
             </div>
           </div>
 
