@@ -36,25 +36,29 @@ interface Message {
   files?: File[]
 }
 
-export default function ChatbotPage() {
+export default function CreateSupplyPage() {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [requirementScore, setRequirementScore] = useState(0)
-  const [contextPage, setContextPage] = useState<string>("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  // Get context from where user came from
+  // Initialize with supply-specific welcome message
   useEffect(() => {
-    const context = sessionStorage.getItem("chatbot-context") || "/home"
-    setContextPage(context)
+    const welcomeMessage = `Hi there! I'm here to help you create an amazing supply listing. I can guide you through:
 
-    // Initialize with context-aware welcome message
-    const welcomeMessage = getContextualWelcomeMessage(context)
+• **Service Description** - What services do you offer?
+• **Portfolio & Examples** - Showcase your best work
+• **Pricing Strategy** - Set competitive rates
+• **Skills & Expertise** - Highlight your qualifications
+• **Availability** - When are you available to work?
+
+Let's start by telling me what type of service you'd like to offer. What's your expertise?`
+
     setMessages([
       {
         id: "welcome",
@@ -70,93 +74,16 @@ export default function ChatbotPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const getContextualWelcomeMessage = (path: string): string => {
-    const pageContext = {
-      "/home":
-        "Hi! I see you're on the home page. I can help you navigate the platform, understand how matching works, or assist with creating your first request. What would you like to know?",
-      "/demand":
-        "Hello! I see you're looking at demand opportunities. I can help you create a professional service request, understand pricing strategies, or find the right suppliers for your needs. How can I assist you?",
-      "/supply":
-        "Hi there! I notice you're on the supply side. I can help you create compelling listings, optimize your profile for better visibility, or understand how to respond to buyer inquiries effectively. What would you like help with?",
-      "/browse":
-        "Hello! I see you're browsing available services. I can help you filter results, understand provider ratings, compare options, or guide you through the hiring process. What are you looking for?",
-      "/matches":
-        "Hi! I see you're checking your matches. I can help you understand match scores, improve your profile for better matches, or guide you on how to engage with potential partners. How can I help?",
-      "/messages":
-        "Hello! I notice you're in your messages. I can help you craft professional responses, understand communication best practices, or resolve any issues with conversations. What do you need help with?",
-      "/profile":
-        "Hi there! I see you're working on your profile. I can help you optimize your profile for better visibility, suggest improvements, or guide you through verification processes. How can I assist?",
-      "/dashboard":
-        "Hello! I see you're on your dashboard. I can help you understand your metrics, improve your performance, or guide you through platform features. What would you like to know about?",
-    }
-
-    return (
-      pageContext[path as keyof typeof pageContext] ||
-      "Hi there! I'm your AI assistant. I can help you with anything related to our platform - from creating requests to finding the perfect matches. How can I help you today?"
-    )
-  }
-
-  const getPageSpecificSuggestions = (path: string): string[] => {
-    const suggestions = {
-      "/home": [
-        "How does the matching algorithm work?",
-        "What's the difference between demand and supply?",
-        "How do I get started on the platform?",
-        "Show me success stories",
-      ],
-      "/demand": [
-        "Help me create a service request",
-        "What makes a good project description?",
-        "How should I set my budget?",
-        "How do I choose the right supplier?",
-      ],
-      "/supply": [
-        "How do I create an attractive listing?",
-        "What should I include in my portfolio?",
-        "How do I set competitive pricing?",
-        "Tips for getting more inquiries",
-      ],
-      "/browse": [
-        "How do I filter search results?",
-        "What do the ratings mean?",
-        "How do I compare different providers?",
-        "What questions should I ask providers?",
-      ],
-      "/matches": [
-        "Why am I getting these matches?",
-        "How can I improve my match score?",
-        "How do I contact a match?",
-        "What if I don't like my matches?",
-      ],
-      "/messages": [
-        "How do I write a professional message?",
-        "What should I include in my first message?",
-        "How do I negotiate terms?",
-        "How do I handle difficult conversations?",
-      ],
-      "/profile": [
-        "How do I optimize my profile?",
-        "What photos should I upload?",
-        "How do I get verified?",
-        "How do I showcase my skills?",
-      ],
-      "/dashboard": [
-        "What do these metrics mean?",
-        "How can I improve my performance?",
-        "How do I track my earnings?",
-        "What are the best practices?",
-      ],
-    }
-
-    return (
-      suggestions[path as keyof typeof suggestions] || [
-        "How does the platform work?",
-        "Help me get started",
-        "Show me around",
-        "What can you help me with?",
-      ]
-    )
-  }
+  const supplySuggestions = [
+    "I'm a web developer",
+    "I offer graphic design services",
+    "I'm a content writer",
+    "I provide digital marketing",
+    "I'm a photographer",
+    "I offer consulting services",
+    "Help me set my pricing",
+    "What should I include in my portfolio?",
+  ]
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -196,7 +123,6 @@ export default function ChatbotPage() {
   }
 
   const processMessage = (userMessage: string, userFiles: File[]) => {
-    // Context-aware responses based on current page
     if (userFiles.length > 0) {
       setIsAnalyzing(true)
 
@@ -214,22 +140,13 @@ export default function ChatbotPage() {
 
         const uniqueTypes = [...new Set(fileTypes)]
 
-        let contextualResponse = ""
-        if (contextPage.includes("/demand")) {
-          contextualResponse = "Perfect! These files will help create a detailed service request. "
-        } else if (contextPage.includes("/supply")) {
-          contextualResponse = "Great! These files will enhance your service listing and portfolio. "
-        } else {
-          contextualResponse = "Excellent! These files will help me understand your needs better. "
-        }
-
         const botResponse: Message = {
           id: Date.now().toString(),
-          content: `${contextualResponse}I've analyzed the ${userFiles.length} ${userFiles.length === 1 ? "file" : "files"} you uploaded (${uniqueTypes.join(", ")}). ${userMessage ? `Combined with your message: "${userMessage}"` : ""}
+          content: `Excellent! I've analyzed the ${userFiles.length} ${userFiles.length === 1 ? "file" : "files"} you uploaded (${uniqueTypes.join(", ")}). These will make great additions to your portfolio!
 
-Based on this information and your current context, I've updated your requirement profile. Your completeness is now at ${newScore}%.
+${userMessage ? `Combined with your message: "${userMessage}"` : ""}
 
-${getContextualAdvice(contextPage, newScore)}`,
+Your listing completeness is now at ${newScore}%. ${getSupplyAdvice(newScore)}`,
           sender: "bot",
           timestamp: new Date(),
         }
@@ -241,7 +158,7 @@ ${getContextualAdvice(contextPage, newScore)}`,
     }
 
     setTimeout(() => {
-      const botResponse = getContextualResponse(userMessage, contextPage)
+      const botResponse = getSupplyResponse(userMessage)
 
       const responseMessage: Message = {
         id: Date.now().toString(),
@@ -255,96 +172,127 @@ ${getContextualAdvice(contextPage, newScore)}`,
     }, 1500)
   }
 
-  const getContextualResponse = (message: string, context: string): string => {
+  const getSupplyResponse = (message: string): string => {
     const lowerCaseMessage = message.toLowerCase()
 
-    // Context-specific responses
-    if (context.includes("/demand")) {
-      if (lowerCaseMessage.includes("create") || lowerCaseMessage.includes("request")) {
-        return `Since you're on the demand page, I can help you create a compelling service request. Here's what makes a great request:
+    if (lowerCaseMessage.includes("web developer") || lowerCaseMessage.includes("developer")) {
+      const newScore = Math.min(requirementScore + 15, 100)
+      setRequirementScore(newScore)
+      return `Great! Web development is in high demand. Here's how to create a standout listing:
 
-• **Clear title** - Be specific about what you need
-• **Detailed description** - Include scope, requirements, and expectations  
-• **Realistic budget** - Research market rates for your project
-• **Timeline** - When do you need this completed?
-• **Skills required** - What expertise should the provider have?
+**Service Title**: "Professional Web Development Services"
 
-Would you like me to guide you through creating a request step by step?`
-      }
-    } else if (context.includes("/supply")) {
-      if (lowerCaseMessage.includes("listing") || lowerCaseMessage.includes("profile")) {
-        return `I see you're working on your supply profile! Here's how to create a standout listing:
+**Key areas to highlight**:
+• Frontend technologies (React, Vue, Angular)
+• Backend expertise (Node.js, Python, PHP)
+• Database management
+• Responsive design
+• E-commerce solutions
 
-• **Professional headline** - Clearly state what you offer
-• **Compelling description** - Highlight your unique value proposition
-• **Portfolio showcase** - Upload your best work examples
-• **Competitive pricing** - Research what others charge
-• **Skills & certifications** - List relevant qualifications
-• **Availability** - Be clear about your schedule
+**Portfolio must-haves**:
+• Live website examples
+• Before/after screenshots
+• Client testimonials
+• Code samples (GitHub links)
 
-Want me to help you optimize any specific section?`
-      }
-    } else if (context.includes("/browse")) {
-      if (lowerCaseMessage.includes("filter") || lowerCaseMessage.includes("search")) {
-        return `Great! I can help you find exactly what you're looking for. Here are the best filtering strategies:
-
-• **Use specific keywords** - Be precise about your needs
-• **Set budget range** - Filter by what you can afford
-• **Check ratings** - Look for 4.5+ star providers
-• **Review portfolios** - See examples of their work
-• **Read reviews** - Learn from others' experiences
-• **Location matters** - Consider time zones for communication
-
-What type of service are you looking for?`
-      }
+What's your primary tech stack? This will help me suggest specific pricing strategies.`
     }
 
-    // General responses with context awareness
-    if (lowerCaseMessage.includes("help") || lowerCaseMessage.includes("how")) {
-      return `I'm here to help! Based on where you are in the platform, here are some things I can assist with:
+    if (lowerCaseMessage.includes("graphic design") || lowerCaseMessage.includes("designer")) {
+      const newScore = Math.min(requirementScore + 15, 100)
+      setRequirementScore(newScore)
+      return `Perfect! Graphic design is always in demand. Here's your listing strategy:
 
-${getContextualAdvice(context, requirementScore)}
+**Service Title**: "Creative Graphic Design Solutions"
 
-Feel free to ask me anything specific, or I can guide you through any process step by step.`
+**Services to offer**:
+• Logo design & branding
+• Marketing materials (flyers, brochures)
+• Social media graphics
+• Web design mockups
+• Print design
+
+**Portfolio essentials**:
+• High-quality design samples
+• Different style examples
+• Brand identity projects
+• Before/after case studies
+
+What type of design work do you enjoy most? This will help position your specialty.`
     }
 
-    // Default contextual response
+    if (lowerCaseMessage.includes("pricing") || lowerCaseMessage.includes("rates")) {
+      return `Great question! Here's a strategic approach to pricing:
+
+**Research Phase**:
+• Check competitor rates in your area
+• Consider your experience level
+• Factor in project complexity
+
+**Pricing Models**:
+• **Hourly**: $25-150/hour (based on expertise)
+• **Project-based**: Fixed price for defined scope
+• **Retainer**: Monthly fee for ongoing work
+
+**Pro Tips**:
+• Start slightly below market rate to build reviews
+• Offer package deals for multiple services
+• Include revisions in your base price
+• Always provide detailed quotes
+
+What's your experience level? Beginner, intermediate, or expert?`
+    }
+
+    if (lowerCaseMessage.includes("portfolio")) {
+      return `Your portfolio is crucial for winning clients! Here's what makes it shine:
+
+**Must-Have Elements**:
+• **Best Work First** - Lead with your strongest pieces
+• **Variety** - Show range across different projects
+• **Case Studies** - Explain your process and results
+• **Client Results** - Include metrics and testimonials
+
+**Technical Tips**:
+• High-resolution images
+• Mobile-friendly presentation
+• Fast loading times
+• Easy navigation
+
+**Content Strategy**:
+• 8-12 pieces maximum
+• Update regularly
+• Include work-in-progress shots
+• Show personality and style
+
+Would you like help organizing your existing work, or do you need guidance on creating new portfolio pieces?`
+    }
+
+    // Default response
     const newScore = Math.min(requirementScore + 10, 100)
     setRequirementScore(newScore)
 
-    return `Thanks for that information! I've noted your request and updated your profile (${newScore}% complete).
+    return `Thanks for that information! I've updated your listing profile (${newScore}% complete).
 
-${getContextualAdvice(context, newScore)}
+${getSupplyAdvice(newScore)}
 
-Is there anything specific about ${getPageName(context)} that you'd like help with?`
+To help you further, could you tell me more about:
+• Your specific skills and expertise
+• Types of projects you want to work on
+• Your availability and preferred working style
+
+What would you like to focus on next?`
   }
 
-  const getContextualAdvice = (context: string, score: number): string => {
-    if (context.includes("/demand")) {
-      return score >= 70
-        ? "Your request details look comprehensive! Ready to post and start receiving proposals?"
-        : "To attract quality suppliers, consider adding more details about your project scope, timeline, and budget."
-    } else if (context.includes("/supply")) {
-      return score >= 70
-        ? "Your profile is looking great! You should start getting quality inquiries soon."
-        : "To improve your visibility, consider adding more portfolio items, skills, and client testimonials."
+  const getSupplyAdvice = (score: number): string => {
+    if (score >= 80) {
+      return "Your listing is looking comprehensive! You're ready to start attracting quality clients."
+    } else if (score >= 60) {
+      return "Good progress! Consider adding more portfolio examples and detailed service descriptions."
+    } else if (score >= 40) {
+      return "You're on the right track. Focus on showcasing your best work and defining your unique value proposition."
+    } else {
+      return "Let's build a strong foundation. Start by clearly defining your services and uploading portfolio examples."
     }
-    return score >= 70
-      ? "You're all set! Your profile is comprehensive and should perform well on the platform."
-      : "Consider adding more details to improve your success rate on the platform."
-  }
-
-  const getPageName = (context: string): string => {
-    const pageNames = {
-      "/demand": "creating service requests",
-      "/supply": "managing your listings",
-      "/browse": "finding services",
-      "/matches": "your matches",
-      "/messages": "messaging",
-      "/profile": "your profile",
-      "/dashboard": "your dashboard",
-    }
-    return pageNames[context as keyof typeof pageNames] || "the platform"
   }
 
   const getFileIcon = (file: File) => {
@@ -366,8 +314,6 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
     }
   }
 
-  const suggestions = getPageSpecificSuggestions(contextPage)
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
@@ -379,9 +325,9 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
             Back
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">AI Assistant</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Create Supply Listing</h1>
             <p className="text-muted-foreground">
-              Context-aware help for {getPageName(contextPage)} • Upload files and ask questions
+              AI-powered assistant to help you create an attractive service listing
             </p>
           </div>
           <SimpleDropdown
@@ -407,10 +353,10 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quick Help</CardTitle>
+                <CardTitle className="text-lg">Quick Start</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {suggestions.map((suggestion, index) => (
+                {supplySuggestions.map((suggestion, index) => (
                   <Button
                     key={index}
                     variant="ghost"
@@ -511,7 +457,7 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
                       </AvatarFallback>
                     </Avatar>
                     <div className="bg-secondary px-4 py-3 rounded-lg max-w-[80%]">
-                      <p className="text-sm mb-2">Analyzing your files...</p>
+                      <p className="text-sm mb-2">Analyzing your portfolio files...</p>
                       <Progress value={65} className="h-2" />
                     </div>
                   </div>
@@ -523,7 +469,7 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
               {files.length > 0 && (
                 <div className="mb-4 p-3 border rounded-md bg-muted/50">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium">Files to upload ({files.length})</h3>
+                    <h3 className="text-sm font-medium">Portfolio files to upload ({files.length})</h3>
                     <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => setFiles([])}>
                       Clear all
                     </Button>
@@ -553,12 +499,12 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="h-5 w-5" />
-                  <span className="sr-only">Upload files</span>
+                  <span className="sr-only">Upload portfolio files</span>
                 </Button>
                 <Input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
 
                 <Input
-                  placeholder={`Ask about ${getPageName(contextPage)}...`}
+                  placeholder="Describe your services or ask for help..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -582,10 +528,10 @@ Is there anything specific about ${getPageName(context)} that you'd like help wi
 
               <div className="flex items-center justify-between mt-3">
                 <div className="text-xs text-muted-foreground">
-                  Context: {getPageName(contextPage)} • Upload files for better assistance
+                  Upload portfolio examples • Get personalized listing advice
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Profile completeness:</span>
+                  <span className="text-xs text-muted-foreground">Listing completeness:</span>
                   <Progress value={requirementScore} className="w-24 h-1.5" />
                   <span className="text-xs font-medium">{requirementScore}%</span>
                 </div>

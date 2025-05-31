@@ -1,13 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { Search, MessageSquare, CheckCircle, Plus } from "lucide-react"
+import { Search, MessageSquare, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
 export default function MessagesPage() {
@@ -90,14 +89,8 @@ export default function MessagesPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-            <p className="text-muted-foreground">Communicate with service providers about your requests</p>
+            <p className="text-muted-foreground">Communicate with your connects</p>
           </div>
-          <Button className="mt-4 md:mt-0" asChild>
-            <Link href="/messages/new">
-              <Plus className="h-4 w-4 mr-2" />
-              New Message
-            </Link>
-          </Button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -169,14 +162,8 @@ export default function MessagesPage() {
               <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">Select a conversation</h2>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Choose a conversation from the list or start a new one to communicate with service providers.
+                Choose a conversation from the list to start communicating with your connects.
               </p>
-              <Button asChild>
-                <Link href="/messages/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Message
-                </Link>
-              </Button>
             </CardContent>
           </Card>
         </div>

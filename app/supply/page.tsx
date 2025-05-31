@@ -3,26 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import {
-  Plus,
-  DollarSign,
-  Eye,
-  MessageSquare,
-  Star,
-  Package,
-  Briefcase,
-  Home,
-  Wrench,
-  Laptop,
-  Heart,
-  Scale,
-  Edit,
-  MoreHorizontal,
-  ArrowRight,
-  MessageCircle,
-} from "lucide-react"
+import { DollarSign, Eye, MessageSquare, Star, Edit, MoreHorizontal, Users } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function SupplyPage() {
   const router = useRouter()
@@ -70,15 +54,6 @@ export default function SupplyPage() {
     },
   ]
 
-  const categories = [
-    { name: "Home Services", icon: Home, demand: "High", color: "bg-blue-500" },
-    { name: "Technology", icon: Laptop, demand: "Very High", color: "bg-purple-500" },
-    { name: "Professional Services", icon: Briefcase, demand: "Medium", color: "bg-green-500" },
-    { name: "Repair & Maintenance", icon: Wrench, demand: "High", color: "bg-orange-500" },
-    { name: "Healthcare", icon: Heart, demand: "Medium", color: "bg-red-500" },
-    { name: "Legal Services", icon: Scale, demand: "Low", color: "bg-indigo-500" },
-  ]
-
   const recentInquiries = [
     {
       id: 1,
@@ -119,30 +94,11 @@ export default function SupplyPage() {
                 <h1 className="text-4xl font-bold tracking-tight mb-2">Supplier Dashboard</h1>
                 <p className="text-xl text-muted-foreground">Manage your services and connect with buyers</p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="bg-primary/10 hover:bg-primary/20"
-                  onClick={() => router.push("/chatbot")}
-                >
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  Chat Assistant
-                </Button>
-                <Button
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={() => router.push("/create-listing")}
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Create New Listing
-                </Button>
-              </div>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card className="border-l-4 border-l-green-500">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -160,38 +116,12 @@ export default function SupplyPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Active Listings</p>
-                    <p className="text-3xl font-bold">8</p>
+                    <p className="text-sm font-medium text-muted-foreground">Connections</p>
+                    <p className="text-3xl font-bold">234</p>
                   </div>
-                  <Package className="h-8 w-8 text-blue-500" />
+                  <Users className="h-8 w-8 text-blue-500" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">2 pending approval</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-purple-500">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Profile Views</p>
-                    <p className="text-3xl font-bold">1,234</p>
-                  </div>
-                  <Eye className="h-8 w-8 text-purple-500" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">+15% this week</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-l-4 border-l-orange-500">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
-                    <p className="text-3xl font-bold">96%</p>
-                  </div>
-                  <Star className="h-8 w-8 text-orange-500" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">4.9/5 avg rating</p>
+                <p className="text-xs text-muted-foreground mt-2">Active connections</p>
               </CardContent>
             </Card>
           </div>
@@ -211,10 +141,6 @@ export default function SupplyPage() {
                         <SimpleSelectItem value="paused">Paused</SimpleSelectItem>
                         <SimpleSelectItem value="draft">Draft</SimpleSelectItem>
                       </SimpleSelect>
-                      <Button variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add New
-                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -236,9 +162,30 @@ export default function SupplyPage() {
                             </div>
                             <p className="text-muted-foreground text-sm mb-2">{listing.description}</p>
                           </div>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => router.push(`/create-listing?duplicate=${listing.id}`)}>
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log("Promote listing:", listing.id)}>
+                                Promote
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => console.log("Archive listing:", listing.id)}>
+                                Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => console.log("Delete listing:", listing.id)}
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -263,54 +210,19 @@ export default function SupplyPage() {
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-muted-foreground">Created {listing.dateCreated}</span>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/edit-listing/${listing.id}`)}
+                            >
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </Button>
-                            <Button size="sm">View Details</Button>
+                            <Button size="sm" onClick={() => router.push(`/supply/${listing.id}`)}>
+                              View Details
+                            </Button>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Market Opportunities */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Market Opportunities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {categories.map((category) => (
-                      <div
-                        key={category.name}
-                        className="flex items-center p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                        onClick={() => router.push(`/create-listing?category=${category.name.toLowerCase()}`)}
-                      >
-                        <div className={`p-3 rounded-lg ${category.color} mr-4`}>
-                          <category.icon className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{category.name}</h3>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">Demand:</span>
-                            <Badge
-                              variant={
-                                category.demand === "Very High"
-                                  ? "default"
-                                  : category.demand === "High"
-                                    ? "secondary"
-                                    : "outline"
-                              }
-                              className="text-xs"
-                            >
-                              {category.demand}
-                            </Badge>
-                          </div>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     ))}
                   </div>
@@ -325,7 +237,7 @@ export default function SupplyPage() {
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle>Recent Inquiries</CardTitle>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => router.push("/connects")}>
                       View All
                     </Button>
                   </div>
@@ -346,7 +258,7 @@ export default function SupplyPage() {
                           <Badge variant="outline" className="text-xs">
                             {inquiry.budget}
                           </Badge>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => router.push(`/messages`)}>
                             Reply
                           </Button>
                         </div>
@@ -377,52 +289,6 @@ export default function SupplyPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Client Satisfaction</span>
                     <span className="font-semibold">4.9/5</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    className="w-full justify-start"
-                    variant="outline"
-                    onClick={() => router.push("/create-listing")}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Listing
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => router.push("/profile")}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline" onClick={() => router.push("/messages")}>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    View Messages
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Tips for Success */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>💡 Success Tips</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Complete Your Profile</p>
-                    <p className="text-muted-foreground">Detailed profiles get 3x more inquiries</p>
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Respond Quickly</p>
-                    <p className="text-muted-foreground">Fast responses improve your ranking</p>
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Showcase Your Work</p>
-                    <p className="text-muted-foreground">Add portfolio items and testimonials</p>
                   </div>
                 </CardContent>
               </Card>

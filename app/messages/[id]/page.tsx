@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
 import { Send, Paperclip, Info, ArrowLeft, CheckCircle, Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 
 interface Message {
   id: string
@@ -127,6 +126,24 @@ export default function ConversationPage({ params }: { params: { id: string } })
     }, 2000)
   }
 
+  const handleFileUpload = () => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = "image/*,application/pdf,.doc,.docx"
+    input.multiple = true
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        console.log(
+          "Files selected:",
+          Array.from(files).map((f) => f.name),
+        )
+        // Handle file upload logic here
+      }
+    }
+    input.click()
+  }
+
   if (!conversation) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -163,10 +180,8 @@ export default function ConversationPage({ params }: { params: { id: string } })
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={`/provider/${conversation.provider.id}`}>
-              <Info className="h-5 w-5" />
-            </Link>
+          <Button variant="ghost" size="icon" onClick={() => router.push(`/profile/${conversation.provider.id}`)}>
+            <Info className="h-5 w-5" />
           </Button>
         </div>
 
@@ -242,7 +257,7 @@ export default function ConversationPage({ params }: { params: { id: string } })
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="flex-shrink-0">
+              <Button variant="outline" size="icon" className="flex-shrink-0" onClick={handleFileUpload}>
                 <Paperclip className="h-5 w-5" />
               </Button>
 

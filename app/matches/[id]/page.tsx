@@ -6,18 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Navigation } from "@/components/navigation"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   ArrowLeft,
   Star,
   MapPin,
   Clock,
-  DollarSign,
-  MessageCircle,
-  Phone,
-  Mail,
   CheckCircle,
   Filter,
   SortAsc,
+  Eye,
+  MessageCircle,
+  AlertTriangle,
+  CreditCard,
 } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 
@@ -26,6 +27,10 @@ export default function MatchesPage() {
   const params = useParams()
   const [isLoading, setIsLoading] = useState(true)
   const [matches, setMatches] = useState<any[]>([])
+  const [userCredits] = useState(150)
+  const [showRequestDetails, setShowRequestDetails] = useState(false)
+  const [selectedMatch, setSelectedMatch] = useState<any>(null)
+  const [showBuyDialog, setShowBuyDialog] = useState(false)
 
   useEffect(() => {
     // Simulate loading data
@@ -40,7 +45,6 @@ export default function MatchesPage() {
           distance: "3.2 miles away",
           rating: 4.8,
           reviews: 124,
-          price: "$80-120/hr",
           availability: "Available today",
           verified: true,
           avatar: "/placeholder.svg?height=100&width=100",
@@ -49,8 +53,9 @@ export default function MatchesPage() {
           isOnline: true,
           description:
             "Professional plumbing services with 15+ years experience. Emergency repairs, installations, and maintenance.",
-          completedJobs: 156,
-          responseTime: "< 1 hour",
+          matchTags: ["Emergency Repair", "Plumbing", "Licensed", "Insured"],
+          creditCost: 5,
+          isPurchased: false,
         },
         {
           id: 2,
@@ -61,7 +66,6 @@ export default function MatchesPage() {
           distance: null,
           rating: 4.9,
           reviews: 89,
-          price: "$50-100/hr",
           availability: "Available within 48 hours",
           verified: true,
           avatar: "/placeholder.svg?height=100&width=100",
@@ -69,8 +73,9 @@ export default function MatchesPage() {
           lastActive: "1 hour ago",
           isOnline: false,
           description: "Full-stack web development team specializing in modern frameworks and e-commerce solutions.",
-          completedJobs: 89,
-          responseTime: "< 2 hours",
+          matchTags: ["Web Development", "E-commerce", "React", "Node.js"],
+          creditCost: 8,
+          isPurchased: true,
         },
         {
           id: 3,
@@ -81,7 +86,6 @@ export default function MatchesPage() {
           distance: "5.8 miles away",
           rating: 4.7,
           reviews: 56,
-          price: "$100-150/hr",
           availability: "Available next week",
           verified: false,
           avatar: "/placeholder.svg?height=100&width=100",
@@ -90,8 +94,9 @@ export default function MatchesPage() {
           isOnline: false,
           description:
             "Professional moving services for residential and commercial clients. Fully insured and licensed.",
-          completedJobs: 78,
-          responseTime: "< 4 hours",
+          matchTags: ["Residential Moving", "Insured", "Licensed", "Weekend Available"],
+          creditCost: 6,
+          isPurchased: false,
         },
       ])
       setIsLoading(false)
@@ -106,8 +111,26 @@ export default function MatchesPage() {
     budget: "$200-500",
     urgency: "Urgent",
     location: "New York, NY",
-    description: "Need immediate plumbing repair for burst pipe in kitchen.",
+    description:
+      "Need immediate plumbing repair for burst pipe in kitchen. Water is leaking and causing damage. Need someone who can come today and fix this issue. Must be licensed and insured.",
     postedDate: "2 hours ago",
+    requirements: ["Licensed plumber", "Emergency service", "Insured", "Available today"],
+  }
+
+  const handleBuyLead = (match: any) => {
+    setSelectedMatch(match)
+    setShowBuyDialog(true)
+  }
+
+  const confirmPurchase = () => {
+    if (selectedMatch) {
+      // Update the match as purchased
+      setMatches((prev) =>
+        prev.map((match) => (match.id === selectedMatch.id ? { ...match, isPurchased: true } : match)),
+      )
+      setShowBuyDialog(false)
+      setSelectedMatch(null)
+    }
   }
 
   return (
@@ -131,7 +154,13 @@ export default function MatchesPage() {
             {/* Request Summary */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Request Details</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Request Details</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => setShowRequestDetails(true)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -225,6 +254,9 @@ export default function MatchesPage() {
                               <Badge className="bg-green-50 text-green-700 border-green-200">
                                 {match.matchScore}% Match
                               </Badge>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                {match.creditCost} credits
+                              </Badge>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -252,29 +284,34 @@ export default function MatchesPage() {
 
                             <p className="text-muted-foreground mb-4">{match.description}</p>
 
-                            <div className="flex flex-wrap items-center gap-4 text-sm">
-                              <div className="flex items-center">
-                                <DollarSign className="h-4 w-4 mr-1" />
-                                <span className="font-medium">{match.price}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Completed Jobs: </span>
-                                <span className="font-medium">{match.completedJobs}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground">Response Time: </span>
-                                <span className="font-medium">{match.responseTime}</span>
-                              </div>
+                            {/* Match Tags */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {match.matchTags.map((tag: string, tagIndex: number) => (
+                                <Badge key={tagIndex} variant="secondary" className="bg-primary/10 text-primary">
+                                  {tag}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex flex-col gap-3 lg:w-48">
-                          <Button className="w-full" onClick={() => router.push(`/messages/${match.id}`)}>
-                            <MessageCircle className="h-4 w-4 mr-2" />
-                            Send Message
-                          </Button>
+                          {match.isPurchased ? (
+                            <Button className="w-full" onClick={() => router.push(`/messages/${match.id}`)}>
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Send Message
+                            </Button>
+                          ) : (
+                            <Button
+                              className="w-full"
+                              onClick={() => handleBuyLead(match)}
+                              disabled={userCredits < match.creditCost}
+                            >
+                              <CreditCard className="h-4 w-4 mr-2" />
+                              Buy Lead
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             className="w-full"
@@ -282,17 +319,15 @@ export default function MatchesPage() {
                           >
                             View Profile
                           </Button>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="icon" className="flex-1">
-                              <Phone className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="flex-1">
-                              <Mail className="h-4 w-4" />
-                            </Button>
-                          </div>
                           <div className="text-center text-xs text-muted-foreground">
                             Last active: {match.lastActive}
                           </div>
+                          {userCredits < match.creditCost && !match.isPurchased && (
+                            <div className="flex items-center gap-1 text-xs text-red-600 bg-red-50 p-2 rounded">
+                              <AlertTriangle className="h-3 w-3" />
+                              Insufficient balance
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -300,25 +335,112 @@ export default function MatchesPage() {
                 ))}
           </div>
 
-          {/* No Matches State */}
-          {!isLoading && matches.length === 0 && (
-            <Card className="p-8 text-center">
-              <div className="max-w-md mx-auto">
-                <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No matches found</h3>
-                <p className="text-muted-foreground mb-4">
-                  We couldn't find any suppliers matching your requirements. Try adjusting your filters or expanding
-                  your search criteria.
-                </p>
-                <div className="flex gap-2 justify-center">
-                  <Button variant="outline" onClick={() => router.push("/demand")}>
-                    Edit Request
-                  </Button>
-                  <Button onClick={() => router.push("/supply")}>Browse All Suppliers</Button>
+          {/* Request Details Dialog */}
+          <Dialog open={showRequestDetails} onOpenChange={setShowRequestDetails}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Request Details</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">{requestDetails.title}</h3>
+                  <div className="flex gap-2 mt-2">
+                    <Badge variant="secondary">{requestDetails.category}</Badge>
+                    <Badge variant={requestDetails.urgency === "Urgent" ? "destructive" : "outline"}>
+                      {requestDetails.urgency}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Budget</p>
+                    <p>{requestDetails.budget}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Location</p>
+                    <p>{requestDetails.location}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
+                  <p className="text-sm">{requestDetails.description}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Requirements</p>
+                  <div className="flex flex-wrap gap-2">
+                    {requestDetails.requirements.map((req, index) => (
+                      <Badge key={index} variant="outline">
+                        {req}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground">Posted: {requestDetails.postedDate}</p>
                 </div>
               </div>
-            </Card>
-          )}
+            </DialogContent>
+          </Dialog>
+
+          {/* Buy Lead Dialog */}
+          <Dialog open={showBuyDialog} onOpenChange={setShowBuyDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Lead Purchase</DialogTitle>
+              </DialogHeader>
+              {selectedMatch && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={selectedMatch.avatar || "/placeholder.svg"} alt={selectedMatch.name} />
+                      <AvatarFallback>{selectedMatch.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">{selectedMatch.name}</h3>
+                      <p className="text-sm text-muted-foreground">{selectedMatch.category}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span>Lead Cost:</span>
+                      <span className="font-semibold">{selectedMatch.creditCost} credits</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span>Your Balance:</span>
+                      <span className="font-semibold">{userCredits} credits</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t pt-2">
+                      <span>After Purchase:</span>
+                      <span className="font-semibold">{userCredits - selectedMatch.creditCost} credits</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    After purchasing this lead, you'll be able to contact {selectedMatch.name} directly and they will
+                    appear in your Connects page.
+                  </p>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowBuyDialog(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={confirmPurchase}
+                      className="flex-1"
+                      disabled={userCredits < selectedMatch.creditCost}
+                    >
+                      Confirm Purchase
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>

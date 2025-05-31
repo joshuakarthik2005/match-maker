@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import {
   Bell,
   Menu,
-  Home,
   ShoppingCart,
   Package,
   MessageSquare,
@@ -26,13 +25,9 @@ import { SimpleDropdown, SimpleDropdownItem, SimpleDropdownSeparator } from "@/c
 export function Navigation() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [unreadMessages] = useState(3) // Mock unread message count
 
   const routes = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: Home,
-    },
     {
       name: "Demand",
       path: "/demand",
@@ -47,6 +42,7 @@ export function Navigation() {
       name: "Messages",
       path: "/messages",
       icon: MessageSquare,
+      badge: unreadMessages > 0 ? unreadMessages : undefined,
     },
     {
       name: "Connects",
@@ -73,7 +69,11 @@ export function Navigation() {
 
           <SimpleSheet open={isOpen} onOpenChange={setIsOpen} side="left">
             <div className="flex flex-col gap-6 py-4">
-              <Link href="/" className="flex items-center gap-2 text-lg font-bold" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-lg font-bold"
+                onClick={() => setIsOpen(false)}
+              >
                 <span className="text-primary">MatchMaker</span>
               </Link>
               <nav className="flex flex-col gap-2">
@@ -91,13 +91,18 @@ export function Navigation() {
                   >
                     <route.icon className="h-4 w-4" />
                     {route.name}
+                    {route.badge && (
+                      <Badge className="ml-auto h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                        {route.badge}
+                      </Badge>
+                    )}
                   </Link>
                 ))}
               </nav>
             </div>
           </SimpleSheet>
 
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold">
+          <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
             <span className="text-primary">MatchMaker</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -106,11 +111,16 @@ export function Navigation() {
                 key={route.path}
                 href={route.path}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-foreground/80",
+                  "text-sm font-medium transition-colors hover:text-foreground/80 flex items-center gap-2",
                   pathname === route.path ? "text-foreground" : "text-foreground/60",
                 )}
               >
                 {route.name}
+                {route.badge && (
+                  <Badge className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {route.badge}
+                  </Badge>
+                )}
               </Link>
             ))}
           </nav>
@@ -118,7 +128,7 @@ export function Navigation() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 mr-2">
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              Credits: 150
+              Credit balance: 150
             </Badge>
           </div>
 

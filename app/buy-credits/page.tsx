@@ -6,62 +6,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
 import { Input } from "@/components/ui/input"
-import { CreditCard, Star, Check, ArrowLeft, Clock, Zap, Gift, History, Wallet } from "lucide-react"
+import { CreditCard, ArrowLeft, History, Wallet, Calculator } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function BuyCreditsPage() {
   const router = useRouter()
-  const [selectedPlan, setSelectedPlan] = useState(2)
-  const [customAmount, setCustomAmount] = useState("")
+  const [creditAmount, setCreditAmount] = useState("")
 
-  const creditPlans = [
-    {
-      id: 1,
-      name: "Starter Pack",
-      credits: 50,
-      price: 25,
-      pricePerCredit: 0.5,
-      popular: false,
-      savings: 0,
-      features: ["Basic matching", "Standard support", "30-day validity"],
-    },
-    {
-      id: 2,
-      name: "Professional",
-      credits: 150,
-      price: 60,
-      pricePerCredit: 0.4,
-      popular: true,
-      savings: 15,
-      features: ["Priority matching", "Premium support", "60-day validity", "Featured listings"],
-    },
-    {
-      id: 3,
-      name: "Business",
-      credits: 300,
-      price: 105,
-      pricePerCredit: 0.35,
-      popular: false,
-      savings: 30,
-      features: ["Instant matching", "24/7 support", "90-day validity", "Featured listings", "Analytics dashboard"],
-    },
-    {
-      id: 4,
-      name: "Enterprise",
-      credits: 500,
-      price: 150,
-      pricePerCredit: 0.3,
-      popular: false,
-      savings: 40,
-      features: [
-        "Unlimited matching",
-        "Dedicated support",
-        "1-year validity",
-        "All premium features",
-        "Custom integrations",
-      ],
-    },
-  ]
+  const calculatePrice = (credits: number) => {
+    if (credits >= 10 && credits <= 50) {
+      return credits * 0.5
+    } else if (credits >= 51 && credits <= 100) {
+      return credits * 0.4
+    } else if (credits > 100) {
+      return credits * 0.25
+    }
+    return 0
+  }
+
+  const getPricePerCredit = (credits: number) => {
+    if (credits >= 10 && credits <= 50) {
+      return 0.5
+    } else if (credits >= 51 && credits <= 100) {
+      return 0.4
+    } else if (credits > 100) {
+      return 0.25
+    }
+    return 0
+  }
 
   const recentTransactions = [
     {
@@ -76,26 +48,42 @@ export default function BuyCreditsPage() {
       id: 2,
       type: "Used",
       credits: -25,
-      description: "Premium listing boost",
+      description: "Lead purchase - John's Plumbing",
       date: "2025-01-27",
       status: "Completed",
     },
     {
       id: 3,
-      type: "Bonus",
-      credits: 10,
-      description: "Referral bonus",
+      type: "Used",
+      credits: -8,
+      description: "Lead purchase - TechSolutions Inc.",
+      date: "2025-01-26",
+      status: "Completed",
+    },
+    {
+      id: 4,
+      type: "Purchase",
+      credits: 100,
+      amount: 40,
       date: "2025-01-25",
       status: "Completed",
     },
   ]
+
+  const handlePurchase = () => {
+    const credits = Number.parseInt(creditAmount)
+    if (credits >= 10) {
+      // In a real app, you would process the payment here
+      router.push("/dashboard")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <main className="container py-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
@@ -103,15 +91,15 @@ export default function BuyCreditsPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-4xl font-bold tracking-tight">Manage Credits</h1>
-                <p className="text-xl text-muted-foreground">Buy credits and manage your transactions</p>
+                <h1 className="text-4xl font-bold tracking-tight">Buy Credits</h1>
+                <p className="text-xl text-muted-foreground">Purchase credits to connect with suppliers</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Purchase Section */}
+            <div className="space-y-6">
               {/* Current Balance */}
               <Card className="border-l-4 border-l-green-500">
                 <CardContent className="p-6">
@@ -119,156 +107,106 @@ export default function BuyCreditsPage() {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
                       <p className="text-4xl font-bold text-green-600">150 Credits</p>
-                      <p className="text-sm text-muted-foreground mt-1">Valid until March 15, 2025</p>
                     </div>
                     <Wallet className="h-12 w-12 text-green-500" />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Credit Plans */}
-              <div>
-                <h2 className="text-2xl font-bold mb-6">Choose Your Credit Plan</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {creditPlans.map((plan) => (
-                    <Card
-                      key={plan.id}
-                      className={`cursor-pointer transition-all hover:shadow-lg ${
-                        selectedPlan === plan.id ? "ring-2 ring-primary" : ""
-                      } ${plan.popular ? "border-primary" : ""}`}
-                      onClick={() => setSelectedPlan(plan.id)}
-                    >
-                      <CardHeader className="relative">
-                        {plan.popular && (
-                          <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
-                            <Star className="h-3 w-3 mr-1" />
-                            Most Popular
-                          </Badge>
-                        )}
-                        <div className="text-center">
-                          <h3 className="text-xl font-bold">{plan.name}</h3>
-                          <div className="mt-2">
-                            <span className="text-3xl font-bold">{plan.credits}</span>
-                            <span className="text-muted-foreground"> credits</span>
-                          </div>
-                          <div className="mt-1">
-                            <span className="text-2xl font-bold">${plan.price}</span>
-                            <span className="text-sm text-muted-foreground"> (${plan.pricePerCredit}/credit)</span>
-                          </div>
-                          {plan.savings > 0 && (
-                            <Badge variant="secondary" className="mt-2">
-                              Save {plan.savings}%
-                            </Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {plan.features.map((feature, index) => (
-                            <li key={index} className="flex items-center text-sm">
-                              <Check className="h-4 w-4 text-green-500 mr-2" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Amount */}
+              {/* Pricing Table */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Custom Amount</CardTitle>
+                  <CardTitle>Credit Pricing</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-4 items-end">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium mb-2">Enter custom credit amount</label>
-                      <Input
-                        type="number"
-                        placeholder="Enter amount"
-                        value={customAmount}
-                        onChange={(e) => setCustomAmount(e.target.value)}
-                        min="10"
-                        max="1000"
-                      />
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">10 - 50 Credits</p>
+                        <p className="text-sm text-muted-foreground">Best for occasional use</p>
+                      </div>
+                      <Badge variant="outline">$0.50 per credit</Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {customAmount && <p>Cost: ${(Number.parseInt(customAmount) * 0.45).toFixed(2)}</p>}
+                    <div className="flex justify-between items-center p-3 border rounded-lg bg-blue-50">
+                      <div>
+                        <p className="font-medium">51 - 100 Credits</p>
+                        <p className="text-sm text-muted-foreground">Popular choice</p>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800">$0.40 per credit</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 border rounded-lg bg-green-50">
+                      <div>
+                        <p className="font-medium">100+ Credits</p>
+                        <p className="text-sm text-muted-foreground">Best value for businesses</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">$0.25 per credit</Badge>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Purchase Button */}
+              {/* Purchase Form */}
               <Card>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {customAmount
-                          ? `${customAmount} Credits`
-                          : `${creditPlans.find((p) => p.id === selectedPlan)?.name}`}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {customAmount
-                          ? `$${(Number.parseInt(customAmount) * 0.45).toFixed(2)}`
-                          : `$${creditPlans.find((p) => p.id === selectedPlan)?.price}`}
-                      </p>
+                <CardHeader>
+                  <CardTitle>Purchase Credits</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Number of Credits</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter amount (minimum 10)"
+                      value={creditAmount}
+                      onChange={(e) => setCreditAmount(e.target.value)}
+                      min="10"
+                      max="1000"
+                    />
+                  </div>
+
+                  {creditAmount && Number.parseInt(creditAmount) >= 10 && (
+                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                      <div className="flex justify-between">
+                        <span>Credits:</span>
+                        <span className="font-medium">{creditAmount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Price per credit:</span>
+                        <span className="font-medium">
+                          ${getPricePerCredit(Number.parseInt(creditAmount)).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="font-medium">Total:</span>
+                        <span className="font-bold text-lg">
+                          ${calculatePrice(Number.parseInt(creditAmount)).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
-                    <Button size="lg" className="bg-primary hover:bg-primary/90">
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Purchase Credits
-                    </Button>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Check className="h-4 w-4 text-green-500 mr-2" />
+                  )}
+
+                  <Button
+                    className="w-full"
+                    onClick={handlePurchase}
+                    disabled={!creditAmount || Number.parseInt(creditAmount) < 10}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Purchase Credits
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground text-center">
                     Secure payment with 256-bit SSL encryption
-                  </div>
+                  </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Sidebar */}
+            {/* Transaction History */}
             <div className="space-y-6">
-              {/* How Credits Work */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>How Credits Work</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Zap className="h-5 w-5 text-yellow-500 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-sm">Connect with Suppliers</p>
-                      <p className="text-xs text-muted-foreground">Use 1 credit per connection</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Star className="h-5 w-5 text-purple-500 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-sm">Featured Listings</p>
-                      <p className="text-xs text-muted-foreground">Boost visibility for 5 credits</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-blue-500 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-sm">Priority Support</p>
-                      <p className="text-xs text-muted-foreground">Get faster responses</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Transactions */}
               <Card>
                 <CardHeader>
                   <div className="flex justify-between items-center">
-                    <CardTitle>Recent Transactions</CardTitle>
-                    <Button variant="outline" size="sm">
+                    <CardTitle>Transaction History</CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => router.push("/transactions")}>
                       <History className="h-4 w-4 mr-2" />
                       View All
                     </Button>
@@ -279,7 +217,7 @@ export default function BuyCreditsPage() {
                     {recentTransactions.map((transaction) => (
                       <div
                         key={transaction.id}
-                        className="flex justify-between items-center py-2 border-b last:border-b-0"
+                        className="flex justify-between items-center py-3 border-b last:border-b-0"
                       >
                         <div>
                           <p className="font-medium text-sm">{transaction.type}</p>
@@ -305,25 +243,34 @@ export default function BuyCreditsPage() {
                 </CardContent>
               </Card>
 
-              {/* Special Offers */}
+              {/* How Credits Work */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Special Offers</CardTitle>
+                  <CardTitle>How Credits Work</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Gift className="h-4 w-4 text-yellow-600" />
-                      <p className="font-medium text-sm">Referral Bonus</p>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <Calculator className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Connect with Suppliers</p>
+                      <p className="text-xs text-muted-foreground">
+                        Use credits to purchase leads and contact suppliers
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Get 10 free credits for each friend you refer!</p>
                   </div>
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Star className="h-4 w-4 text-blue-600" />
-                      <p className="font-medium text-sm">First Purchase</p>
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="h-5 w-5 text-green-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Secure Payments</p>
+                      <p className="text-xs text-muted-foreground">All transactions are encrypted and secure</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Get 20% extra credits on your first purchase!</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Wallet className="h-5 w-5 text-purple-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">No Expiry</p>
+                      <p className="text-xs text-muted-foreground">Credits never expire once purchased</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

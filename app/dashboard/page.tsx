@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { ShoppingCart, Package, ChevronRight } from "lucide-react"
+import { ShoppingCart, Package, ChevronRight, Plus, ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { SimpleDropdown, SimpleDropdownItem } from "@/components/ui/simple-dropdown"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -16,6 +17,18 @@ export default function DashboardPage() {
     const storedName = localStorage.getItem("userName") || "User"
     setUserName(storedName)
   }, [])
+
+  const handleCreateDemand = () => {
+    // Set context for chatbot
+    sessionStorage.setItem("chatbot-context", "/demand")
+    router.push("/chatbot")
+  }
+
+  const handleCreateSupply = () => {
+    // Set context for chatbot
+    sessionStorage.setItem("chatbot-context", "/supply")
+    router.push("/chatbot")
+  }
 
   const projects = [
     {
@@ -46,9 +59,30 @@ export default function DashboardPage() {
       <Navigation />
 
       <main className="p-4 space-y-6">
-        <div className="space-y-2 fade-in">
-          <h2 className="text-2xl font-bold">Hello {userName}</h2>
-          <p className="text-gray-600">What would you like to do today?</p>
+        <div className="flex justify-between items-start">
+          <div className="space-y-2 fade-in">
+            <h2 className="text-2xl font-bold">Hello {userName}</h2>
+            <p className="text-gray-600">What would you like to do today?</p>
+          </div>
+
+          <SimpleDropdown
+            trigger={
+              <Button className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            }
+          >
+            <SimpleDropdownItem onClick={handleCreateDemand}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Create Demand
+            </SimpleDropdownItem>
+            <SimpleDropdownItem onClick={handleCreateSupply}>
+              <Package className="mr-2 h-4 w-4" />
+              Create Supply
+            </SimpleDropdownItem>
+          </SimpleDropdown>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
