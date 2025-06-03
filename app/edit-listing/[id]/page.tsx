@@ -92,8 +92,10 @@ export default function EditListingPage() {
   useEffect(() => {
     // Simulate loading data from API
     setTimeout(() => {
-      if (listingId && listingData[listingId as keyof typeof listingData]) {
-        setFormData(listingData[listingId as keyof typeof listingData])
+      const id = Array.isArray(listingId) ? listingId[0] : listingId
+      const numericId = Number(id)
+      if (numericId && listingData[numericId as keyof typeof listingData]) {
+        setFormData(listingData[numericId as keyof typeof listingData])
       }
       setIsLoading(false)
     }, 500)

@@ -1,60 +1,78 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Navigation } from "@/components/navigation"
-import {
-  Send,
-  Bot,
-  Upload,
-  FileText,
-  ImageIcon,
-  FileArchive,
-  Mic,
-  Video,
-  X,
-  ArrowLeft,
-  Menu,
-  Settings,
-  HelpCircle,
-} from "lucide-react"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
+import { Send, ArrowLeft, Paperclip } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { SimpleDropdown, SimpleDropdownItem } from "@/components/ui/simple-dropdown"
 
 interface Message {
   id: string
   content: string
   sender: "user" | "bot"
   timestamp: Date
-  files?: File[]
+  isSystemMessage?: boolean
+  isHelpMessage?: boolean
 }
+
+interface DemandData {
+  product?: string
+  quantity?: string
+  itemType?: string
+  budget?: string
+  location?: string
+  requiredDate?: string
+}
+
+interface SupplyData {
+  service?: string
+  experience?: string
+  portfolio?: string
+  pricing?: string
+  availableDates?: string[]
+  location?: string
+}
+
+type ConversationStep =
+  | "product"
+  | "quantity"
+  | "itemType"
+  | "budget"
+  | "location"
+  | "requiredDate"
+  | "complete"
+  | "service"
+  | "experience"
+  | "portfolio"
+  | "pricing"
+  | "availableDates"
+  | "supplyLocation"
+  | "supplyComplete"
 
 export default function ChatbotPage() {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
-  const [isTyping, setIsTyping] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [requirementScore, setRequirementScore] = useState(0)
-  const [contextPage, setContextPage] = useState<string>("")
+  const [currentStep, setCurrentStep] = useState<ConversationStep>("product")
+  const [conversationType, setConversationType] = useState<"demand" | "supply">("demand")
+  const [demandData, setDemandData] = useState<DemandData>({})
+  const [supplyData, setSupplyData] = useState<SupplyData>({})
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  // Get context from where user came from
   useEffect(() => {
-    const context = sessionStorage.getItem("chatbot-context") || "/home"
-    setContextPage(context)
+    // Check if user came from Create Demand or Create Supply
+    const context = sessionStorage.getItem("chatbot-context") || ""
+    const type = context.includes("demand") ? "demand" : context.includes("supply") ? "supply" : "demand"
+    setConversationType(type)
 
-    // Initialize with context-aware welcome message
-    const welcomeMessage = getContextualWelcomeMessage(context)
+    // Set initial step based on type
+    setCurrentStep(type === "demand" ? "product" : "service")
+
+    // Initialize with welcome message
+    const welcomeMessage =
+      type === "demand" ? "Welcome! What product are you looking for?" : "Welcome! What service do you want to offer?"
+
     setMessages([
       {
         id: "welcome",
@@ -65,535 +83,615 @@ export default function ChatbotPage() {
     ])
   }, [])
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const getContextualWelcomeMessage = (path: string): string => {
-    const pageContext = {
-      "/home":
-        "Hi! I see you're on the home page. I can help you navigate the platform, understand how matching works, or assist with creating your first request. What would you like to know?",
-      "/demand":
-        "Hello! I see you're looking at demand opportunities. I can help you create a professional service request, understand pricing strategies, or find the right suppliers for your needs. How can I assist you?",
-      "/supply":
-        "Hi there! I notice you're on the supply side. I can help you create compelling listings, optimize your profile for better visibility, or understand how to respond to buyer inquiries effectively. What would you like help with?",
-      "/browse":
-        "Hello! I see you're browsing available services. I can help you filter results, understand provider ratings, compare options, or guide you through the hiring process. What are you looking for?",
-      "/matches":
-        "Hi! I see you're checking your matches. I can help you understand match scores, improve your profile for better matches, or guide you on how to engage with potential partners. How can I help?",
-      "/messages":
-        "Hello! I notice you're in your messages. I can help you craft professional responses, understand communication best practices, or resolve any issues with conversations. What do you need help with?",
-      "/profile":
-        "Hi there! I see you're working on your profile. I can help you optimize your profile for better visibility, suggest improvements, or guide you through verification processes. How can I assist?",
-      "/dashboard":
-        "Hello! I see you're on your dashboard. I can help you understand your metrics, improve your performance, or guide you through platform features. What would you like to know about?",
+  const getQuickHelpSuggestions = (): string[] => {
+    if (conversationType === "demand") {
+      switch (currentStep) {
+        case "product":
+          return [
+            "What types of products can I request?",
+            "How do I describe my product needs?",
+            "Can I request multiple products?",
+            "What details should I include?",
+          ]
+        case "quantity":
+          return [
+            "How do I determine the right quantity?",
+            "Can I change quantity later?",
+            "What if I need a large volume?",
+            "Do suppliers offer bulk discounts?",
+          ]
+        case "itemType":
+          return [
+            "How specific should I be about the item type?",
+            "What if I'm flexible on the model?",
+            "Should I mention alternatives?",
+            "How do I specify technical requirements?",
+          ]
+        case "budget":
+          return [
+            "How should I set my budget?",
+            "What's a reasonable price range?",
+            "Should I include taxes in my budget?",
+            "Can I negotiate after setting a budget?",
+          ]
+        case "location":
+          return [
+            "How do delivery locations affect pricing?",
+            "Can I request international shipping?",
+            "What if I need delivery to multiple locations?",
+            "How do I specify delivery instructions?",
+          ]
+        case "requiredDate":
+          return [
+            "How far in advance should I plan?",
+            "What if I need it urgently?",
+            "Should I give myself buffer time?",
+            "What if my date is flexible?",
+          ]
+        default:
+          return [
+            "Help me create a service request",
+            "What makes a good project description?",
+            "How should I set my budget?",
+            "How do I choose the right supplier?",
+          ]
+      }
+    } else {
+      switch (currentStep) {
+        case "service":
+          return [
+            "How do I describe my service effectively?",
+            "What services are in high demand?",
+            "How specific should my service offering be?",
+            "Should I list multiple services?",
+          ]
+        case "experience":
+          return [
+            "How do I showcase my experience?",
+            "Does experience level affect pricing?",
+            "What if I'm new to this service?",
+            "Should I mention certifications?",
+          ]
+        case "portfolio":
+          return [
+            "What makes a good portfolio?",
+            "How many examples should I include?",
+            "What if I can't share previous work?",
+            "How do I describe confidential projects?",
+          ]
+        case "pricing":
+          return [
+            "How should I set my pricing?",
+            "What pricing models work best?",
+            "Should I offer different packages?",
+            "How do I stay competitive with pricing?",
+          ]
+        case "availableDates":
+          return [
+            "How should I set my delivery timeline?",
+            "Should I include buffer time?",
+            "What if I can deliver earlier?",
+            "How do I handle rush orders?",
+          ]
+        case "supplyLocation":
+          return [
+            "Does my location matter for services?",
+            "Should I offer remote services?",
+            "How does location affect pricing?",
+            "Can I serve multiple locations?",
+          ]
+        default:
+          return [
+            "Help me create a service listing",
+            "What makes a good portfolio?",
+            "How should I set my pricing?",
+            "How do I attract the right clients?",
+          ]
+      }
+    }
+  }
+
+  const getHelpResponse = (question: string): string => {
+    const helpResponses: { [key: string]: string } = {
+      // Demand help responses
+      "What types of products can I request?":
+        "You can request any physical products like electronics, furniture, clothing, books, home appliances, sports equipment, and more. Our platform connects you with suppliers for various product categories.",
+      "How do I describe my product needs?":
+        "Be specific about the product name, brand preferences, specifications, quality requirements, and any special features you need. The more details you provide, the better suppliers can understand your needs.",
+      "Can I request multiple products?":
+        "Yes, you can request multiple products in a single request or create separate requests for different products. For bulk orders with multiple items, mention this in your description.",
+      "What details should I include?":
+        "Include product specifications, preferred brands, quality standards, packaging requirements, and any certifications needed. This helps suppliers provide accurate quotes.",
+
+      "How do I determine the right quantity?":
+        "Consider your actual needs, storage capacity, and budget. Start with smaller quantities for new suppliers to test quality before placing larger orders.",
+      "Can I change quantity later?":
+        "You can discuss quantity changes with suppliers before finalizing the order. However, significant changes might affect pricing and delivery timelines.",
+      "What if I need a large volume?":
+        "For bulk orders, mention this upfront as suppliers often offer volume discounts. You may also need to discuss extended delivery timelines for large quantities.",
+      "Do suppliers offer bulk discounts?":
+        "Yes, most suppliers offer better pricing for larger quantities. The discount percentage varies by product and supplier, so compare multiple quotes.",
+
+      "How specific should I be about the item type?":
+        "Be as specific as possible about the exact model, specifications, and features you need. This ensures you get accurate quotes and the right product.",
+      "What if I'm flexible on the model?":
+        "If you're open to alternatives, mention this and specify your key requirements. Suppliers can suggest similar products that might offer better value.",
+      "Should I mention alternatives?":
+        "Yes, mentioning acceptable alternatives gives suppliers more options to work with and might lead to better pricing or availability.",
+      "How do I specify technical requirements?":
+        "List all technical specifications, compatibility requirements, certifications needed, and performance standards. Include any technical documentation if available.",
+
+      "How should I set my budget?":
+        "Research market prices for similar products, consider quality requirements, and set a realistic range. Include some buffer for unexpected costs like shipping or taxes.",
+      "What's a reasonable price range?":
+        "Price ranges vary by product category. Research online marketplaces and competitor pricing to set a competitive budget that attracts quality suppliers.",
+      "Should I include taxes in my budget?":
+        "Specify whether your budget includes or excludes taxes, shipping, and other fees. This helps suppliers provide accurate quotes.",
+      "Can I negotiate after setting a budget?":
+        "Yes, budgets are starting points for negotiation. Suppliers may offer different pricing based on quantity, payment terms, or delivery schedules.",
+
+      "How do delivery locations affect pricing?":
+        "Remote or international locations typically cost more for shipping. Urban areas usually have better delivery options and lower costs.",
+      "Can I request international shipping?":
+        "Yes, but consider customs duties, longer delivery times, and higher shipping costs. Ensure suppliers can handle international shipping requirements.",
+      "What if I need delivery to multiple locations?":
+        "Mention all delivery locations upfront. Some suppliers offer consolidated shipping, while others might charge separately for each location.",
+      "How do I specify delivery instructions?":
+        "Include specific addresses, contact persons, delivery time preferences, and any special handling requirements like fragile items or security protocols.",
+
+      "How far in advance should I plan (demand)?":
+        "Plan at least 1-2 weeks in advance for standard products, and 4-6 weeks for custom or specialized items. This gives suppliers time to prepare and ensures better pricing.",
+      "What if I need it urgently?":
+        "For urgent requests, be prepared to pay premium rates and have limited supplier options. Clearly communicate your urgency and be flexible on other requirements.",
+      "Can I set multiple possible dates?":
+        "Yes, providing multiple acceptable dates increases your chances of finding available suppliers and may result in better pricing.",
+      "What if my date is flexible?":
+        "Flexible dates often result in better pricing as suppliers can optimize their schedules. Mention your flexibility to get more competitive offers.",
+
+      // Supply help responses
+      "How do I describe my service effectively?":
+        "Use clear, specific language to describe what you offer. Focus on the value you provide, your unique approach, and the problems you solve for clients.",
+      "What services are in high demand?":
+        "Digital services like web development, mobile apps, digital marketing, content creation, and consulting are currently in high demand. Tech and creative services perform well.",
+      "How specific should my service offering be?":
+        "Be specific enough to attract the right clients but broad enough to capture various opportunities. Focus on your core expertise while mentioning related skills.",
+      "Should I list multiple services?":
+        "You can offer multiple related services, but ensure you can deliver quality in all areas. It's better to excel in fewer services than to be mediocre in many.",
+
+      "How do I showcase my experience?":
+        "Mention years of experience, number of projects completed, types of clients served, and any notable achievements. Use specific numbers and results when possible.",
+      "Does experience level affect pricing?":
+        "Yes, more experienced professionals typically command higher rates. However, newer professionals can compete with competitive pricing and exceptional service.",
+      "What if I'm new to this service?":
+        "Focus on your transferable skills, education, certifications, and any personal projects. Offer competitive rates and exceptional service to build your reputation.",
+      "Should I mention certifications?":
+        "Yes, relevant certifications add credibility and can justify higher rates. Include industry-recognized certifications and ongoing education.",
+
+      "What makes a good portfolio?":
+        "A good portfolio shows diverse, high-quality work that demonstrates your skills and range. Include case studies with challenges, solutions, and results achieved.",
+      "How many examples should I include?":
+        "Include 5-10 of your best, most relevant examples. Quality is more important than quantity. Ensure each example showcases different skills or approaches.",
+      "What if I can't share previous work?":
+        "Create sample projects, use anonymized case studies, or describe projects without revealing confidential details. Focus on your process and results achieved.",
+      "How do I describe confidential projects?":
+        "Focus on your role, challenges overcome, skills used, and results achieved without revealing client names or sensitive details. Use generic industry terms.",
+
+      "How should I set my pricing?":
+        "Research market rates for your skill level and location. Consider your experience, the value you provide, and your target profit margin. Start competitive and adjust based on demand.",
+      "What pricing models work best?":
+        "Hourly rates work for ongoing work, fixed prices for defined projects, and retainers for long-term relationships. Choose based on project type and client preference.",
+      "Should I offer different packages?":
+        "Yes, offering basic, standard, and premium packages gives clients options and can increase your average project value. Clearly define what's included in each package.",
+      "How do I stay competitive with pricing?":
+        "Monitor market rates regularly, focus on value over price, improve your skills to justify higher rates, and consider offering unique services or faster delivery.",
+
+      "How many dates should I provide?":
+        "Provide at least 3-5 available dates over the next 2-4 weeks. This gives clients flexibility while showing your availability.",
+      "Should I include weekends?":
+        "Include weekends if you're willing to work them, as this can be a competitive advantage. Many clients appreciate weekend availability for urgent projects.",
+      "What if my availability changes?":
+        "Update your available dates regularly to keep them current. Clients appreciate accurate, up-to-date availability information.",
+      "How far in advance should I plan (supply)?":
+        "Plan your availability 2-4 weeks in advance. This helps with scheduling and shows clients you're organized and professional.",
+
+      "Does my location matter for services?":
+        "For remote services, location matters less, but time zones and local market rates can be factors. For on-site services, location is crucial.",
+      "Should I offer remote services?":
+        "Remote services expand your market reach and often have higher demand. Many clients prefer remote work for cost and convenience.",
+      "How does location affect pricing?":
+        "Local market rates vary significantly. Research rates in your area and target markets. Remote work often allows access to higher-paying markets.",
+      "Can I serve multiple locations?":
+        "Yes, especially for remote services. For on-site work, consider travel costs and time when serving multiple locations.",
     }
 
     return (
-      pageContext[path as keyof typeof pageContext] ||
-      "Hi there! I'm your AI assistant. I can help you with anything related to our platform - from creating requests to finding the perfect matches. How can I help you today?"
+      helpResponses[question] ||
+      "I'd be happy to help with that question. Could you please be more specific about what you'd like to know?"
     )
   }
 
-  const getPageSpecificSuggestions = (path: string): string[] => {
-    const suggestions = {
-      "/home": [
-        "How does the matching algorithm work?",
-        "What's the difference between demand and supply?",
-        "How do I get started on the platform?",
-        "Show me success stories",
-      ],
-      "/demand": [
-        "Help me create a service request",
-        "What makes a good project description?",
-        "How should I set my budget?",
-        "How do I choose the right supplier?",
-      ],
-      "/supply": [
-        "How do I create an attractive listing?",
-        "What should I include in my portfolio?",
-        "How do I set competitive pricing?",
-        "Tips for getting more inquiries",
-      ],
-      "/browse": [
-        "How do I filter search results?",
-        "What do the ratings mean?",
-        "How do I compare different providers?",
-        "What questions should I ask providers?",
-      ],
-      "/matches": [
-        "Why am I getting these matches?",
-        "How can I improve my match score?",
-        "How do I contact a match?",
-        "What if I don't like my matches?",
-      ],
-      "/messages": [
-        "How do I write a professional message?",
-        "What should I include in my first message?",
-        "How do I negotiate terms?",
-        "How do I handle difficult conversations?",
-      ],
-      "/profile": [
-        "How do I optimize my profile?",
-        "What photos should I upload?",
-        "How do I get verified?",
-        "How do I showcase my skills?",
-      ],
-      "/dashboard": [
-        "What do these metrics mean?",
-        "How can I improve my performance?",
-        "How do I track my earnings?",
-        "What are the best practices?",
-      ],
-    }
-
-    return (
-      suggestions[path as keyof typeof suggestions] || [
-        "How does the platform work?",
-        "Help me get started",
-        "Show me around",
-        "What can you help me with?",
-      ]
-    )
+  const isQuickHelpQuestion = (userInput: string): boolean => {
+    const allHelpQuestions = getQuickHelpSuggestions()
+    return allHelpQuestions.includes(userInput)
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setFiles((prev) => [...prev, ...newFiles])
-    }
+  const handleQuickHelpClick = (suggestion: string) => {
+    setInput(suggestion)
   }
 
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+  const handleSendMessage = () => {
+    if (!input.trim()) return
 
-  const handleSendMessage = async () => {
-    if (!input.trim() && files.length === 0) return
-
-    const newMessage: Message = {
+    // Add user message
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: input,
       sender: "user",
       timestamp: new Date(),
-      files: files.length > 0 ? [...files] : undefined,
+      isHelpMessage: isQuickHelpQuestion(input.trim()),
     }
 
-    setMessages((prev) => [...prev, newMessage])
+    setMessages((prev) => [...prev, userMessage])
+
+    // Check if this is a help question
+    if (isQuickHelpQuestion(input.trim())) {
+      handleHelpQuestion(input.trim())
+    } else {
+      // Process the response based on current step
+      processStep(input.trim())
+    }
+
     setInput("")
-    setFiles([])
-
-    // Simulate typing indicator
-    setIsTyping(true)
-
-    // Process the message and generate a response
-    processMessage(input, files)
   }
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setInput(suggestion)
-  }
+  const handleHelpQuestion = (question: string) => {
+    setTimeout(() => {
+      const helpResponse = getHelpResponse(question)
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: helpResponse,
+        sender: "bot",
+        timestamp: new Date(),
+        isHelpMessage: true,
+      }
+      setMessages((prev) => [...prev, botMessage])
 
-  const processMessage = (userMessage: string, userFiles: File[]) => {
-    // Context-aware responses based on current page
-    if (userFiles.length > 0) {
-      setIsAnalyzing(true)
-
+      // After answering the help question, remind user of the current step
       setTimeout(() => {
-        setIsAnalyzing(false)
-        setIsTyping(false)
-
-        const newScore = Math.min(requirementScore + 25, 100)
-        setRequirementScore(newScore)
-
-        const fileTypes = userFiles.map((file) => {
-          const type = file.type.split("/")[0]
-          return type === "application" ? "document" : type
-        })
-
-        const uniqueTypes = [...new Set(fileTypes)]
-
-        let contextualResponse = ""
-        if (contextPage.includes("/demand")) {
-          contextualResponse = "Perfect! These files will help create a detailed service request. "
-        } else if (contextPage.includes("/supply")) {
-          contextualResponse = "Great! These files will enhance your service listing and portfolio. "
-        } else {
-          contextualResponse = "Excellent! These files will help me understand your needs better. "
-        }
-
-        const botResponse: Message = {
-          id: Date.now().toString(),
-          content: `${contextualResponse}I've analyzed the ${userFiles.length} ${userFiles.length === 1 ? "file" : "files"} you uploaded (${uniqueTypes.join(", ")}). ${userMessage ? `Combined with your message: "${userMessage}"` : ""}
-
-Based on this information and your current context, I've updated your requirement profile. Your completeness is now at ${newScore}%.
-
-${getContextualAdvice(contextPage, newScore)}`,
+        const reminderMessage = getCurrentStepReminder()
+        const reminderBotMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          content: reminderMessage,
           sender: "bot",
           timestamp: new Date(),
         }
+        setMessages((prev) => [...prev, reminderBotMessage])
+      }, 1000)
+    }, 1000)
+  }
 
-        setMessages((prev) => [...prev, botResponse])
-      }, 2000)
+  const getCurrentStepReminder = (): string => {
+    if (conversationType === "demand") {
+      switch (currentStep) {
+        case "product":
+          return "Now, what product are you looking for?"
+        case "quantity":
+          return "How many units do you need?"
+        case "itemType":
+          return "What type of item is this?"
+        case "budget":
+          return "What is your price range or budget?"
+        case "location":
+          return "Where should it be delivered?"
+        case "requiredDate":
+          return "On or before which date do you need this delivered? (Please provide a date like 'June 5, 2025')"
+        default:
+          return "Please continue with your request."
+      }
+    } else {
+      switch (currentStep) {
+        case "service":
+          return "What service do you want to offer?"
+        case "experience":
+          return "How many years of experience do you have?"
+        case "portfolio":
+          return "Can you describe your portfolio or past work?"
+        case "pricing":
+          return "What are your pricing rates?"
+        case "availableDates":
+          return "On or before which date can you deliver/complete this? (Please provide a date like 'June 5, 2025')"
+        case "supplyLocation":
+          return "Where are you located?"
+        default:
+          return "Please continue with your listing."
+      }
+    }
+  }
 
-      return
+  const processStep = (userInput: string) => {
+    if (conversationType === "demand") {
+      processDemandStep(userInput)
+    } else {
+      processSupplyStep(userInput)
+    }
+  }
+
+  const processDemandStep = (userInput: string) => {
+    let nextStep: ConversationStep = currentStep
+    let botResponse = ""
+
+    switch (currentStep) {
+      case "product":
+        setDemandData((prev) => ({ ...prev, product: userInput }))
+        botResponse = "How many units do you need?"
+        nextStep = "quantity"
+        break
+      case "quantity":
+        setDemandData((prev) => ({ ...prev, quantity: userInput }))
+        botResponse = "What type of item is this?"
+        nextStep = "itemType"
+        break
+      case "itemType":
+        setDemandData((prev) => ({ ...prev, itemType: userInput }))
+        botResponse = "What is your price range or budget?"
+        nextStep = "budget"
+        break
+      case "budget":
+        setDemandData((prev) => ({ ...prev, budget: userInput }))
+        botResponse = "Where should it be delivered?"
+        nextStep = "location"
+        break
+      case "location":
+        setDemandData((prev) => ({ ...prev, location: userInput }))
+        botResponse = "On or before which date do you need this delivered? (Please provide a date like 'June 5, 2025')"
+        nextStep = "requiredDate"
+        break
+      case "requiredDate":
+        setDemandData((prev) => ({ ...prev, requiredDate: userInput }))
+        showDemandSummary(userInput)
+        nextStep = "complete"
+        return
     }
 
     setTimeout(() => {
-      const botResponse = getContextualResponse(userMessage, contextPage)
-
-      const responseMessage: Message = {
-        id: Date.now().toString(),
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
         content: botResponse,
         sender: "bot",
         timestamp: new Date(),
       }
-
-      setMessages((prev) => [...prev, responseMessage])
-      setIsTyping(false)
-    }, 1500)
+      setMessages((prev) => [...prev, botMessage])
+      setCurrentStep(nextStep)
+    }, 1000)
   }
 
-  const getContextualResponse = (message: string, context: string): string => {
-    const lowerCaseMessage = message.toLowerCase()
+  const processSupplyStep = (userInput: string) => {
+    let nextStep: ConversationStep = currentStep
+    let botResponse = ""
 
-    // Context-specific responses
-    if (context.includes("/demand")) {
-      if (lowerCaseMessage.includes("create") || lowerCaseMessage.includes("request")) {
-        return `Since you're on the demand page, I can help you create a compelling service request. Here's what makes a great request:
+    switch (currentStep) {
+      case "service":
+        setSupplyData((prev) => ({ ...prev, service: userInput }))
+        botResponse = "How many years of experience do you have?"
+        nextStep = "experience"
+        break
+      case "experience":
+        setSupplyData((prev) => ({ ...prev, experience: userInput }))
+        botResponse = "Can you describe your portfolio or past work?"
+        nextStep = "portfolio"
+        break
+      case "portfolio":
+        setSupplyData((prev) => ({ ...prev, portfolio: userInput }))
+        botResponse = "What are your pricing rates?"
+        nextStep = "pricing"
+        break
+      case "pricing":
+        setSupplyData((prev) => ({ ...prev, pricing: userInput }))
+        botResponse =
+          "On or before which date can you deliver/complete this? (Please provide a date like 'June 5, 2025')"
+        nextStep = "availableDates"
+        break
+      case "availableDates":
+        // Parse the dates from user input
+        const dates = userInput.split(",").map((date) => date.trim())
+        setSupplyData((prev) => ({ ...prev, availableDates: dates }))
+        botResponse = "Where are you located?"
+        nextStep = "supplyLocation"
+        break
+      case "supplyLocation":
+        setSupplyData((prev) => ({ ...prev, location: userInput }))
+        showSupplySummary(userInput)
+        nextStep = "supplyComplete"
+        return
+    }
 
-• **Clear title** - Be specific about what you need
-• **Detailed description** - Include scope, requirements, and expectations  
-• **Realistic budget** - Research market rates for your project
-• **Timeline** - When do you need this completed?
-• **Skills required** - What expertise should the provider have?
-
-Would you like me to guide you through creating a request step by step?`
+    setTimeout(() => {
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: botResponse,
+        sender: "bot",
+        timestamp: new Date(),
       }
-    } else if (context.includes("/supply")) {
-      if (lowerCaseMessage.includes("listing") || lowerCaseMessage.includes("profile")) {
-        return `I see you're working on your supply profile! Here's how to create a standout listing:
+      setMessages((prev) => [...prev, botMessage])
+      setCurrentStep(nextStep)
+    }, 1000)
+  }
 
-• **Professional headline** - Clearly state what you offer
-• **Compelling description** - Highlight your unique value proposition
-• **Portfolio showcase** - Upload your best work examples
-• **Competitive pricing** - Research what others charge
-• **Skills & certifications** - List relevant qualifications
-• **Availability** - Be clear about your schedule
+  const showDemandSummary = (requiredDate: string) => {
+    const finalData = { ...demandData, requiredDate }
 
-Want me to help you optimize any specific section?`
+    setTimeout(() => {
+      const successMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "✅ Demand submitted successfully!",
+        sender: "bot",
+        timestamp: new Date(),
+        isSystemMessage: true,
       }
-    } else if (context.includes("/browse")) {
-      if (lowerCaseMessage.includes("filter") || lowerCaseMessage.includes("search")) {
-        return `Great! I can help you find exactly what you're looking for. Here are the best filtering strategies:
 
-• **Use specific keywords** - Be precise about your needs
-• **Set budget range** - Filter by what you can afford
-• **Check ratings** - Look for 4.5+ star providers
-• **Review portfolios** - See examples of their work
-• **Read reviews** - Learn from others' experiences
-• **Location matters** - Consider time zones for communication
-
-What type of service are you looking for?`
+      const summaryMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        content: `📦 Product: ${finalData.product}
+🔢 Quantity: ${finalData.quantity}
+📱 Item Type: ${finalData.itemType}
+💰 Budget: ₹${finalData.budget}
+📍 Location: ${finalData.location}
+📅 Required By: ${finalData.requiredDate}`,
+        sender: "bot",
+        timestamp: new Date(),
+        isSystemMessage: true,
       }
-    }
 
-    // General responses with context awareness
-    if (lowerCaseMessage.includes("help") || lowerCaseMessage.includes("how")) {
-      return `I'm here to help! Based on where you are in the platform, here are some things I can assist with:
-
-${getContextualAdvice(context, requirementScore)}
-
-Feel free to ask me anything specific, or I can guide you through any process step by step.`
-    }
-
-    // Default contextual response
-    const newScore = Math.min(requirementScore + 10, 100)
-    setRequirementScore(newScore)
-
-    return `Thanks for that information! I've noted your request and updated your profile (${newScore}% complete).
-
-${getContextualAdvice(context, newScore)}
-
-Is there anything specific about ${getPageName(context)} that you'd like help with?`
+      setMessages((prev) => [...prev, successMessage, summaryMessage])
+    }, 1000)
   }
 
-  const getContextualAdvice = (context: string, score: number): string => {
-    if (context.includes("/demand")) {
-      return score >= 70
-        ? "Your request details look comprehensive! Ready to post and start receiving proposals?"
-        : "To attract quality suppliers, consider adding more details about your project scope, timeline, and budget."
-    } else if (context.includes("/supply")) {
-      return score >= 70
-        ? "Your profile is looking great! You should start getting quality inquiries soon."
-        : "To improve your visibility, consider adding more portfolio items, skills, and client testimonials."
-    }
-    return score >= 70
-      ? "You're all set! Your profile is comprehensive and should perform well on the platform."
-      : "Consider adding more details to improve your success rate on the platform."
+  const showSupplySummary = (location: string) => {
+    const finalData = { ...supplyData, location }
+
+    setTimeout(() => {
+      const successMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "✅ Supply listing submitted successfully!",
+        sender: "bot",
+        timestamp: new Date(),
+        isSystemMessage: true,
+      }
+
+      const summaryMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        content: `🛠️ Service: ${finalData.service}
+⭐ Experience: ${finalData.experience}
+💼 Portfolio: ${finalData.portfolio}
+💰 Pricing: ${finalData.pricing}
+📅 Can Deliver By: ${finalData.availableDates?.join(", ")}
+📍 Location: ${finalData.location}`,
+        sender: "bot",
+        timestamp: new Date(),
+        isSystemMessage: true,
+      }
+
+      setMessages((prev) => [...prev, successMessage, summaryMessage])
+    }, 1000)
   }
 
-  const getPageName = (context: string): string => {
-    const pageNames = {
-      "/demand": "creating service requests",
-      "/supply": "managing your listings",
-      "/browse": "finding services",
-      "/matches": "your matches",
-      "/messages": "messaging",
-      "/profile": "your profile",
-      "/dashboard": "your dashboard",
-    }
-    return pageNames[context as keyof typeof pageNames] || "the platform"
-  }
-
-  const getFileIcon = (file: File) => {
-    const type = file.type.split("/")[0]
-    switch (type) {
-      case "image":
-        return <ImageIcon className="h-5 w-5 text-blue-500" />
-      case "audio":
-        return <Mic className="h-5 w-5 text-purple-500" />
-      case "video":
-        return <Video className="h-5 w-5 text-red-500" />
-      case "application":
-        if (file.type.includes("pdf")) {
-          return <FileText className="h-5 w-5 text-red-500" />
-        }
-        return <FileArchive className="h-5 w-5 text-amber-500" />
-      default:
-        return <FileText className="h-5 w-5 text-gray-500" />
-    }
-  }
-
-  const suggestions = getPageSpecificSuggestions(contextPage)
+  const isComplete = currentStep === "complete" || currentStep === "supplyComplete"
+  const quickHelpSuggestions = getQuickHelpSuggestions()
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navigation />
 
-      <main className="flex-1 container py-6 flex flex-col">
-        <div className="mb-6 flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">AI Assistant</h1>
-            <p className="text-muted-foreground">
-              Context-aware help for {getPageName(contextPage)} • Upload files and ask questions
-            </p>
-          </div>
-          <SimpleDropdown
-            trigger={
-              <Button variant="outline" size="icon">
-                <Menu className="h-4 w-4" />
-              </Button>
-            }
-          >
-            <SimpleDropdownItem onClick={() => console.log("Chat Settings")}>
-              <Settings className="mr-2 h-4 w-4" />
-              Chat Settings
-            </SimpleDropdownItem>
-            <SimpleDropdownItem onClick={() => console.log("Help & Support")}>
-              <HelpCircle className="mr-2 h-4 w-4" />
-              Help & Support
-            </SimpleDropdownItem>
-          </SimpleDropdown>
+      {/* Header */}
+      <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <h1 className="text-lg font-semibold">{conversationType === "demand" ? "Create Demand" : "Create Supply"}</h1>
+        </div>
+      </div>
+
+      <div className="flex-1 flex p-4 gap-4">
+        {/* Quick Help Box */}
+        <div className="w-80 shrink-0">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xl">Quick Help</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {quickHelpSuggestions.map((suggestion, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  className="w-full justify-start text-left h-auto p-0 hover:bg-transparent hover:underline"
+                  onClick={() => handleQuickHelpClick(suggestion)}
+                >
+                  <p className="text-base font-medium">{suggestion}</p>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1">
-          {/* Quick Suggestions Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Help</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {suggestions.map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-left h-auto p-3 whitespace-normal"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
-              </CardContent>
-            </Card>
+        {/* Messages */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto space-y-4">
+            {messages.map((message) => (
+              <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                    message.sender === "user"
+                      ? message.isHelpMessage
+                        ? "bg-green-500 text-white rounded-br-md"
+                        : "bg-blue-500 text-white rounded-br-md"
+                      : message.isSystemMessage
+                        ? "bg-gray-200 text-gray-800 rounded-bl-md"
+                        : message.isHelpMessage
+                          ? "bg-yellow-100 text-gray-800 rounded-bl-md border border-yellow-300"
+                          : "bg-gray-200 text-gray-800 rounded-bl-md"
+                  }`}
+                >
+                  <p className="whitespace-pre-line text-sm">{message.content}</p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Chat Interface */}
-          <Card className="lg:col-span-3 flex flex-col">
-            <CardContent className="flex-1 flex flex-col p-4">
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {message.sender === "bot" && (
-                      <Avatar className="h-8 w-8 mr-2 mt-1 flex-shrink-0 bg-primary/10">
-                        <AvatarFallback>
-                          <Bot className="h-5 w-5 text-primary" />
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-
-                    <div
-                      className={`max-w-[80%] px-4 py-3 rounded-lg ${
-                        message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-secondary"
-                      } ${message.sender === "user" ? "bounce-in" : "scale-in"}`}
-                    >
-                      <p className="whitespace-pre-line">{message.content}</p>
-
-                      {message.files && message.files.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          <p className="text-xs opacity-70">Uploaded files:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {message.files.map((file, index) => (
-                              <Badge
-                                key={index}
-                                variant={message.sender === "user" ? "secondary" : "outline"}
-                                className="flex items-center gap-1 text-xs"
-                              >
-                                {getFileIcon(file)}
-                                <span className="truncate max-w-[100px]">{file.name}</span>
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <p className="text-xs opacity-70 mt-1">
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <Avatar className="h-8 w-8 mr-2 mt-1 bg-primary/10">
-                      <AvatarFallback>
-                        <Bot className="h-5 w-5 text-primary" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="bg-secondary px-4 py-2 rounded-lg">
-                      <div className="flex space-x-1">
-                        <div
-                          className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        ></div>
-                        <div
-                          className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        ></div>
-                        <div
-                          className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {isAnalyzing && (
-                  <div className="flex justify-start">
-                    <Avatar className="h-8 w-8 mr-2 mt-1 bg-primary/10">
-                      <AvatarFallback>
-                        <Bot className="h-5 w-5 text-primary" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="bg-secondary px-4 py-3 rounded-lg max-w-[80%]">
-                      <p className="text-sm mb-2">Analyzing your files...</p>
-                      <Progress value={65} className="h-2" />
-                    </div>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
-              </div>
-
-              {files.length > 0 && (
-                <div className="mb-4 p-3 border rounded-md bg-muted/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium">Files to upload ({files.length})</h3>
-                    <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => setFiles([])}>
-                      Clear all
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {files.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 p-1 pl-2 border rounded-md bg-background text-sm"
-                      >
-                        {getFileIcon(file)}
-                        <span className="truncate max-w-[150px]">{file.name}</span>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="flex-shrink-0"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-5 w-5" />
-                  <span className="sr-only">Upload files</span>
+          {/* Input */}
+          {!isComplete && (
+            <div className="mt-4">
+              <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500">
+                  <Paperclip className="h-4 w-4" />
                 </Button>
-                <Input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
-
                 <Input
-                  placeholder={`Ask about ${getPageName(contextPage)}...`}
+                  placeholder="Type your message..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === "Enter") {
                       e.preventDefault()
                       handleSendMessage()
                     }
                   }}
-                  className="flex-1"
+                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
-
                 <Button
-                  className="flex-shrink-0"
                   onClick={handleSendMessage}
-                  disabled={(!input.trim() && files.length === 0) || isTyping || isAnalyzing}
+                  disabled={!input.trim()}
+                  size="icon"
+                  className="h-8 w-8 rounded-full"
                 >
-                  <Send className="h-5 w-5" />
-                  <span className="sr-only">Send message</span>
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+          )}
 
-              <div className="flex items-center justify-between mt-3">
-                <div className="text-xs text-muted-foreground">
-                  Context: {getPageName(contextPage)} • Upload files for better assistance
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Profile completeness:</span>
-                  <Progress value={requirementScore} className="w-24 h-1.5" />
-                  <span className="text-xs font-medium">{requirementScore}%</span>
-                </div>
+          {isComplete && (
+            <div className="mt-4">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => router.push(conversationType === "demand" ? "/demand" : "/supply")}
+                  className="flex-1"
+                >
+                  View {conversationType === "demand" ? "Demands" : "Supplies"}
+                </Button>
+                <Button variant="outline" onClick={() => window.location.reload()} className="flex-1">
+                  Create Another
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }

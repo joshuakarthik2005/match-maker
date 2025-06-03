@@ -97,23 +97,73 @@ export default function BuyCreditsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Purchase Section */}
-            <div className="space-y-6">
-              {/* Current Balance */}
-              <Card className="border-l-4 border-l-green-500">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
-                      <p className="text-4xl font-bold text-green-600">150 Credits</p>
-                    </div>
-                    <Wallet className="h-12 w-12 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Current Balance - Full Width */}
+          <Card className="border-l-4 border-l-green-500 mb-8">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
+                  <p className="text-4xl font-bold text-green-600">150 Credits</p>
+                </div>
+                <Wallet className="h-12 w-12 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Pricing Table */}
+          {/* Purchase Credits - Full Width */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl">Purchase Credits</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Number of Credits</label>
+                <Input
+                  type="number"
+                  placeholder="Enter amount (minimum 10)"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(e.target.value)}
+                  min="10"
+                  max="1000"
+                />
+              </div>
+
+              {creditAmount && Number.parseInt(creditAmount) >= 10 && (
+                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                  <div className="flex justify-between">
+                    <span>Credits:</span>
+                    <span className="font-medium">{creditAmount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Price per credit:</span>
+                    <span className="font-medium">${getPricePerCredit(Number.parseInt(creditAmount)).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2">
+                    <span className="font-medium">Total:</span>
+                    <span className="font-bold text-lg">
+                      ${calculatePrice(Number.parseInt(creditAmount)).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                className="w-full"
+                onClick={handlePurchase}
+                disabled={!creditAmount || Number.parseInt(creditAmount) < 10}
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Purchase Credits
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">Secure payment with 256-bit SSL encryption</p>
+            </CardContent>
+          </Card>
+
+          {/* Two Column Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left: Pricing Table */}
+            <div className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Credit Pricing</CardTitle>
@@ -144,63 +194,9 @@ export default function BuyCreditsPage() {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Purchase Form */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Purchase Credits</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Number of Credits</label>
-                    <Input
-                      type="number"
-                      placeholder="Enter amount (minimum 10)"
-                      value={creditAmount}
-                      onChange={(e) => setCreditAmount(e.target.value)}
-                      min="10"
-                      max="1000"
-                    />
-                  </div>
-
-                  {creditAmount && Number.parseInt(creditAmount) >= 10 && (
-                    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                      <div className="flex justify-between">
-                        <span>Credits:</span>
-                        <span className="font-medium">{creditAmount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Price per credit:</span>
-                        <span className="font-medium">
-                          ${getPricePerCredit(Number.parseInt(creditAmount)).toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2">
-                        <span className="font-medium">Total:</span>
-                        <span className="font-bold text-lg">
-                          ${calculatePrice(Number.parseInt(creditAmount)).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button
-                    className="w-full"
-                    onClick={handlePurchase}
-                    disabled={!creditAmount || Number.parseInt(creditAmount) < 10}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Purchase Credits
-                  </Button>
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    Secure payment with 256-bit SSL encryption
-                  </p>
-                </CardContent>
-              </Card>
             </div>
 
-            {/* Transaction History */}
+            {/* Right: Transaction History + How Credits Work */}
             <div className="space-y-6">
               <Card>
                 <CardHeader>

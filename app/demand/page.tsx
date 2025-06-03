@@ -83,7 +83,6 @@ export default function DemandPage() {
                   </div>
                   <TrendingUp className="h-8 w-8 text-blue-500" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">+12% from last month</p>
               </CardContent>
             </Card>
 
@@ -96,7 +95,6 @@ export default function DemandPage() {
                   </div>
                   <Users className="h-8 w-8 text-green-500" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">Active connections</p>
               </CardContent>
             </Card>
           </div>
@@ -110,7 +108,7 @@ export default function DemandPage() {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Search for services, products, or suppliers..."
+                        placeholder="Search your requests by title, category, or description..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10"
