@@ -17,6 +17,7 @@ import {
   User,
   Settings,
   LogOut,
+  Sliders,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SimpleSheet, SimpleSheetTrigger } from "@/components/ui/simple-sheet"
@@ -157,11 +158,15 @@ export function Navigation() {
             <SimpleDropdownSeparator />
             <SimpleDropdownItem onClick={() => (window.location.href = "/profile")}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Personal Information
             </SimpleDropdownItem>
             <SimpleDropdownItem onClick={() => (window.location.href = "/preferences")}>
-              <Settings className="mr-2 h-4 w-4" />
+              <Sliders className="mr-2 h-4 w-4" />
               Preferences
+            </SimpleDropdownItem>
+            <SimpleDropdownItem onClick={() => (window.location.href = "/profile")}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
             </SimpleDropdownItem>
             <SimpleDropdownSeparator />
             <SimpleDropdownItem onClick={() => (window.location.href = "/login")}>

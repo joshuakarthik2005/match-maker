@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { DollarSign, Eye, MessageSquare, Star, Edit, MoreHorizontal, Users } from "lucide-react"
+import { DollarSign, Eye, MessageSquare, Star, MoreHorizontal, Users } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -213,10 +213,10 @@ export default function SupplyPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => router.push(`/edit-listing/${listing.id}`)}
+                              onClick={() => router.push(`/supply/${listing.id}/matches`)}
                             >
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
+                              <Users className="h-4 w-4 mr-2" />
+                              View Matches
                             </Button>
                             <Button size="sm" onClick={() => router.push(`/supply/${listing.id}`)}>
                               View Details

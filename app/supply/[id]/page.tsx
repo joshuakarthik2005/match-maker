@@ -105,7 +105,7 @@ export default function ListingDetailsPage() {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button onClick={() => router.push(`/create-listing?edit=${listing.id}`)}>
+                <Button onClick={() => router.push(`/edit-listing/${listing.id}`)}>
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Listing
                 </Button>

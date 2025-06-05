@@ -7,9 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Eye, EyeOff, Mail, Phone, Check, X, AlertCircle } from "lucide-react"
-import Link from "next/link"
+import { ArrowLeft, Eye, EyeOff, Mail, Phone, Check, X, AlertCircle, FileText, Shield } from "lucide-react"
 import { useRouter } from "next/navigation"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -20,6 +28,8 @@ export default function SignupPage() {
   const [otp, setOtp] = useState("")
   const [resendTimer, setResendTimer] = useState(0)
   const [generatedOTP, setGeneratedOTP] = useState("")
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false)
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -27,6 +37,8 @@ export default function SignupPage() {
     phone: "",
     dateOfBirth: "",
     country: "",
+    addressLine1: "",
+    addressLine2: "",
     city: "",
     pincode: "",
     username: "",
@@ -34,6 +46,11 @@ export default function SignupPage() {
     confirmPassword: "",
     agreeToTerms: false,
   })
+
+  const [emailValidated, setEmailValidated] = useState(false)
+  const [phoneValidated, setPhoneValidated] = useState(false)
+  const [validatingEmail, setValidatingEmail] = useState(false)
+  const [validatingPhone, setValidatingPhone] = useState(false)
 
   // Password strength checker
   const checkPasswordStrength = (password: string) => {
@@ -82,6 +99,24 @@ export default function SignupPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
+  }
+
+  const validateEmail = async () => {
+    setValidatingEmail(true)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setEmailValidated(true)
+    setValidatingEmail(false)
+    alert("Email validated successfully!")
+  }
+
+  const validatePhone = async () => {
+    setValidatingPhone(true)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setPhoneValidated(true)
+    setValidatingPhone(false)
+    alert("Phone number validated successfully!")
   }
 
   const handleNext = () => {
@@ -189,13 +224,12 @@ export default function SignupPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Last Name</label>
+                  <label className="block text-sm font-medium mb-2">Last Name (Optional)</label>
                   <Input
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
                     className="h-12 rounded-xl"
-                    required
                   />
                 </div>
 
@@ -209,6 +243,26 @@ export default function SignupPage() {
                     className="h-12 rounded-xl"
                     required
                   />
+                  {formData.email && !emailValidated && (
+                    <div className="flex justify-end mt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={validateEmail}
+                        disabled={validatingEmail}
+                        className="text-xs"
+                      >
+                        {validatingEmail ? "Validating..." : "Validate Email"}
+                      </Button>
+                    </div>
+                  )}
+                  {emailValidated && (
+                    <div className="flex items-center gap-1 mt-2 text-green-600 text-sm">
+                      <Check className="h-4 w-4" />
+                      Email validated
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -226,6 +280,26 @@ export default function SignupPage() {
                       required
                     />
                   </div>
+                  {formData.phone && !phoneValidated && (
+                    <div className="flex justify-end mt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={validatePhone}
+                        disabled={validatingPhone}
+                        className="text-xs"
+                      >
+                        {validatingPhone ? "Validating..." : "Validate Phone"}
+                      </Button>
+                    </div>
+                  )}
+                  {phoneValidated && (
+                    <div className="flex items-center gap-1 mt-2 text-green-600 text-sm">
+                      <Check className="h-4 w-4" />
+                      Phone validated
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -253,6 +327,29 @@ export default function SignupPage() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium mb-2">Address Line 1</label>
+                  <Input
+                    name="addressLine1"
+                    value={formData.addressLine1}
+                    onChange={handleChange}
+                    className="h-12 rounded-xl"
+                    placeholder="Street address, building name, etc."
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Address Line 2</label>
+                  <Input
+                    name="addressLine2"
+                    value={formData.addressLine2}
+                    onChange={handleChange}
+                    className="h-12 rounded-xl"
+                    placeholder="Apartment, suite, floor (optional)"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium mb-2">City</label>
                   <Input
                     name="city"
@@ -275,7 +372,39 @@ export default function SignupPage() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full h-12 rounded-xl bg-black hover:bg-gray-800">
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox
+                    id="terms"
+                    checked={formData.agreeToTerms}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, agreeToTerms: checked as boolean }))
+                    }
+                  />
+                  <label htmlFor="terms" className="text-sm">
+                    I agree to the{" "}
+                    <button
+                      type="button"
+                      onClick={() => setTermsDialogOpen(true)}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      Terms of Service
+                    </button>{" "}
+                    and{" "}
+                    <button
+                      type="button"
+                      onClick={() => setPrivacyDialogOpen(true)}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      Privacy Policy
+                    </button>
+                  </label>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 rounded-xl bg-black hover:bg-gray-800"
+                  disabled={!formData.agreeToTerms}
+                >
                   Continue
                 </Button>
               </form>
@@ -426,34 +555,9 @@ export default function SignupPage() {
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, agreeToTerms: checked as boolean }))
-                    }
-                  />
-                  <label htmlFor="terms" className="text-sm">
-                    By signing up, you agree to our{" "}
-                    <Link href="/terms" className="text-blue-600 hover:underline">
-                      Terms
-                    </Link>{" "}
-                    and{" "}
-                    <Link href="/privacy" className="text-blue-600 hover:underline">
-                      Privacy Policy
-                    </Link>
-                    .
-                  </label>
-                </div>
-
                 <Button
                   type="submit"
-                  disabled={
-                    !formData.agreeToTerms ||
-                    formData.password !== formData.confirmPassword ||
-                    passwordStrength.score < 3
-                  }
+                  disabled={formData.password !== formData.confirmPassword || passwordStrength.score < 3}
                   className="w-full h-12 rounded-xl bg-black hover:bg-gray-800"
                 >
                   Continue to Verification
@@ -546,6 +650,183 @@ export default function SignupPage() {
           )}
         </Card>
       </div>
+
+      {/* Terms of Service Dialog */}
+      <Dialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Terms of Service
+            </DialogTitle>
+            <DialogDescription>Please read our terms of service carefully</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            <div className="space-y-4 text-sm">
+              <h3 className="font-semibold text-base">1. Acceptance of Terms</h3>
+              <p>
+                By accessing or using our matchmaking platform, you agree to be bound by these Terms of Service. If you
+                do not agree to these terms, please do not use our services.
+              </p>
+
+              <h3 className="font-semibold text-base">2. Eligibility</h3>
+              <p>
+                You must be at least 18 years old to use our services. By using our platform, you represent and warrant
+                that you are at least 18 years old and have the legal capacity to enter into these terms.
+              </p>
+
+              <h3 className="font-semibold text-base">3. User Accounts</h3>
+              <p>
+                You are responsible for maintaining the confidentiality of your account credentials and for all
+                activities that occur under your account. You agree to notify us immediately of any unauthorized use of
+                your account.
+              </p>
+
+              <h3 className="font-semibold text-base">4. User Content</h3>
+              <p>
+                You retain ownership of any content you submit to our platform. However, by submitting content, you
+                grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, adapt, publish,
+                translate, and distribute your content.
+              </p>
+
+              <h3 className="font-semibold text-base">5. Prohibited Conduct</h3>
+              <p>You agree not to:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Use our services for any illegal purpose</li>
+                <li>Harass, abuse, or harm other users</li>
+                <li>Post false, misleading, or deceptive content</li>
+                <li>Attempt to gain unauthorized access to our systems</li>
+                <li>Use automated scripts to access our platform</li>
+                <li>Interfere with the proper functioning of our services</li>
+              </ul>
+
+              <h3 className="font-semibold text-base">6. Termination</h3>
+              <p>
+                We reserve the right to suspend or terminate your account at our sole discretion, without notice, for
+                conduct that we believe violates these Terms of Service or is harmful to other users, us, or third
+                parties, or for any other reason.
+              </p>
+
+              <h3 className="font-semibold text-base">7. Disclaimer of Warranties</h3>
+              <p>
+                Our services are provided "as is" without warranties of any kind, either express or implied. We do not
+                guarantee that our services will be uninterrupted, secure, or error-free.
+              </p>
+
+              <h3 className="font-semibold text-base">8. Limitation of Liability</h3>
+              <p>
+                To the maximum extent permitted by law, we shall not be liable for any indirect, incidental, special,
+                consequential, or punitive damages, or any loss of profits or revenues.
+              </p>
+
+              <h3 className="font-semibold text-base">9. Changes to Terms</h3>
+              <p>
+                We may modify these Terms of Service at any time. Your continued use of our services after any changes
+                indicates your acceptance of the modified terms.
+              </p>
+
+              <h3 className="font-semibold text-base">10. Governing Law</h3>
+              <p>
+                These Terms of Service shall be governed by and construed in accordance with the laws of [Your
+                Jurisdiction], without regard to its conflict of law provisions.
+              </p>
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={() => setTermsDialogOpen(false)}>I Understand</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Privacy Policy Dialog */}
+      <Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Privacy Policy
+            </DialogTitle>
+            <DialogDescription>How we collect, use, and protect your data</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh] pr-4">
+            <div className="space-y-4 text-sm">
+              <h3 className="font-semibold text-base">1. Information We Collect</h3>
+              <p>
+                We collect information you provide directly to us, such as when you create an account, update your
+                profile, or communicate with other users. This may include:
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Contact information (name, email address, phone number)</li>
+                <li>Profile information (photo, bio, preferences)</li>
+                <li>Communications you send through our platform</li>
+                <li>Transaction information when you make purchases</li>
+                <li>Location information when you use location-based features</li>
+              </ul>
+
+              <h3 className="font-semibold text-base">2. How We Use Your Information</h3>
+              <p>We use the information we collect to:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Provide, maintain, and improve our services</li>
+                <li>Process transactions and send related information</li>
+                <li>Send you technical notices, updates, and support messages</li>
+                <li>Respond to your comments and questions</li>
+                <li>Develop new products and services</li>
+                <li>Monitor and analyze trends and usage</li>
+                <li>Detect, investigate, and prevent fraudulent transactions and other illegal activities</li>
+              </ul>
+
+              <h3 className="font-semibold text-base">3. Information Sharing</h3>
+              <p>We may share your information with:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Other users as part of the normal operation of our services</li>
+                <li>Service providers who perform services on our behalf</li>
+                <li>Law enforcement or other parties when required by law or to protect rights</li>
+                <li>In connection with a business transaction such as a merger or acquisition</li>
+              </ul>
+
+              <h3 className="font-semibold text-base">4. Data Security</h3>
+              <p>
+                We implement reasonable security measures to protect your personal information from unauthorized access,
+                alteration, disclosure, or destruction. However, no method of transmission over the Internet or
+                electronic storage is 100% secure.
+              </p>
+
+              <h3 className="font-semibold text-base">5. Your Choices</h3>
+              <p>
+                You can access and update certain information through your account settings. You may also opt out of
+                receiving promotional communications from us by following the instructions in those communications.
+              </p>
+
+              <h3 className="font-semibold text-base">6. Cookies and Tracking Technologies</h3>
+              <p>
+                We use cookies and similar technologies to collect information about your browsing activities and to
+                distinguish you from other users. You can set your browser to refuse all or some cookies or to alert you
+                when cookies are being sent.
+              </p>
+
+              <h3 className="font-semibold text-base">7. Children's Privacy</h3>
+              <p>
+                Our services are not intended for individuals under the age of 18, and we do not knowingly collect
+                personal information from children under 18.
+              </p>
+
+              <h3 className="font-semibold text-base">8. Changes to This Policy</h3>
+              <p>
+                We may update this Privacy Policy from time to time. We will notify you of any changes by posting the
+                new policy on this page and updating the effective date.
+              </p>
+
+              <h3 className="font-semibold text-base">9. Contact Us</h3>
+              <p>
+                If you have any questions about this Privacy Policy, please contact us at privacy@matchmakingapp.com.
+              </p>
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={() => setPrivacyDialogOpen(false)}>I Understand</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
