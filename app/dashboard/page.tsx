@@ -88,7 +88,7 @@ export default function DashboardPage() {
             <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
               <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-blue-600" />
               <div className="space-y-2">
-                <h3 className="text-lg sm:text-xl font-semibold">Demand</h3>
+                <h3 className="text-lg sm:text-xl font-semibold">My Demand</h3>
                 <p className="text-sm text-gray-600">Looking for services or products?</p>
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
             <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
               <Package className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-green-600" />
               <div className="space-y-2">
-                <h3 className="text-lg sm:text-xl font-semibold">Supply</h3>
+                <h3 className="text-lg sm:text-xl font-semibold">My Supply</h3>
                 <p className="text-sm text-gray-600">Have services or products to offer?</p>
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>

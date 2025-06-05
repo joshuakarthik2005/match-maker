@@ -91,7 +91,7 @@ export default function SupplyPage() {
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col gap-3 sm:gap-4">
               <div>
-                <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-1 sm:mb-2">Supplier Dashboard</h1>
+                <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-1 sm:mb-2">My Requests - Supply</h1>
                 <p className="text-base sm:text-xl text-muted-foreground">
                   Manage your services and connect with buyers
                 </p>

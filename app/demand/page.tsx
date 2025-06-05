@@ -64,7 +64,7 @@ export default function DemandPage() {
           <div className="mb-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight mb-2">Find Services & Products</h1>
+                <h1 className="text-4xl font-bold tracking-tight mb-2">My Requests - Demand</h1>
                 <p className="text-xl text-muted-foreground">
                   Post your requirements and connect with verified suppliers
                 </p>
@@ -116,15 +116,6 @@ export default function DemandPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <div className="flex flex-col">
-                      <label className="text-xs text-muted-foreground mb-1">Category</label>
-                      <SimpleSelect defaultValue="all">
-                        <SimpleSelectItem value="all">All Categories</SimpleSelectItem>
-                        <SimpleSelectItem value="home">Home Services</SimpleSelectItem>
-                        <SimpleSelectItem value="tech">Technology</SimpleSelectItem>
-                        <SimpleSelectItem value="professional">Professional</SimpleSelectItem>
-                      </SimpleSelect>
-                    </div>
                     <div className="flex flex-col">
                       <label className="text-xs text-muted-foreground mb-1">Status</label>
                       <SimpleSelect defaultValue="all-status">
