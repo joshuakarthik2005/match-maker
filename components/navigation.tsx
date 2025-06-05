@@ -14,7 +14,6 @@ import {
   MessageSquare,
   Users,
   CreditCard,
-  User,
   Settings,
   LogOut,
   Sliders,
@@ -58,18 +57,18 @@ export function Navigation() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+      <div className="container flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4">
         <div className="flex items-center gap-2 md:gap-4">
           <SimpleSheetTrigger onClick={() => setIsOpen(true)}>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden h-8 w-8">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SimpleSheetTrigger>
 
           <SimpleSheet open={isOpen} onOpenChange={setIsOpen} side="left">
-            <div className="flex flex-col gap-6 py-4">
+            <div className="flex flex-col gap-6 py-4 px-4">
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 text-lg font-bold"
@@ -84,7 +83,7 @@ export function Navigation() {
                     href={route.path}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
+                      "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium",
                       pathname === route.path
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-muted hover:text-foreground",
@@ -103,7 +102,7 @@ export function Navigation() {
             </div>
           </SimpleSheet>
 
-          <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
+          <Link href="/dashboard" className="flex items-center gap-2 text-base sm:text-lg font-bold">
             <span className="text-primary">MatchMaker</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -126,9 +125,9 @@ export function Navigation() {
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 mr-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 mr-1 sm:mr-2">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-2 py-1">
               Credit balance: 150
             </Badge>
           </div>
@@ -136,30 +135,26 @@ export function Navigation() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative"
+            className="relative h-8 w-8 sm:h-10 sm:w-10"
             onClick={() => (window.location.href = "/notifications")}
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
             <span className="sr-only">Notifications</span>
           </Button>
 
           <SimpleDropdown
             trigger={
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 sm:h-10 sm:w-10">
+                <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
                   <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback className="text-xs">JD</AvatarFallback>
                 </Avatar>
               </Button>
             }
           >
             <div className="px-2 py-1.5 text-sm font-medium">My Account</div>
             <SimpleDropdownSeparator />
-            <SimpleDropdownItem onClick={() => (window.location.href = "/profile")}>
-              <User className="mr-2 h-4 w-4" />
-              Personal Information
-            </SimpleDropdownItem>
             <SimpleDropdownItem onClick={() => (window.location.href = "/preferences")}>
               <Sliders className="mr-2 h-4 w-4" />
               Preferences

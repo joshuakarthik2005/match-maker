@@ -19,13 +19,11 @@ export default function DashboardPage() {
   }, [])
 
   const handleCreateDemand = () => {
-    // Set context for chatbot
     sessionStorage.setItem("chatbot-context", "/demand")
     router.push("/chatbot")
   }
 
   const handleCreateSupply = () => {
-    // Set context for chatbot
     sessionStorage.setItem("chatbot-context", "/supply")
     router.push("/chatbot")
   }
@@ -58,16 +56,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      <main className="p-4 space-y-6">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2 fade-in">
-            <h2 className="text-2xl font-bold">Hello {userName}</h2>
-            <p className="text-gray-600">What would you like to do today?</p>
+      <main className="px-3 py-4 sm:px-4 sm:py-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+          <div className="space-y-1 sm:space-y-2">
+            <h2 className="text-xl sm:text-2xl font-bold">Hello {userName}</h2>
+            <p className="text-sm sm:text-base text-gray-600">What would you like to do today?</p>
           </div>
 
           <SimpleDropdown
             trigger={
-              <Button className="bg-primary hover:bg-primary/90">
+              <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Create New
                 <ChevronDown className="h-4 w-4 ml-2" />
@@ -85,18 +83,22 @@ export default function DashboardPage() {
           </SimpleDropdown>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card className="slide-in" style={{ animationDelay: "0.1s" }}>
-            <CardContent className="p-6 text-center space-y-4">
-              <ShoppingCart className="h-12 w-12 mx-auto text-blue-600" />
-              <div>
-                <h3 className="text-xl font-semibold">Demand</h3>
-                <p className="text-sm text-gray-600 mt-1">Looking for services or products?</p>
-                <div className="flex items-center justify-center mt-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
+              <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-blue-600" />
+              <div className="space-y-2">
+                <h3 className="text-lg sm:text-xl font-semibold">Demand</h3>
+                <p className="text-sm text-gray-600">Looking for services or products?</p>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-green-600">Active 5</span>
                 </div>
-                <Button variant="link" className="text-blue-600 p-0 h-auto mt-2" onClick={() => router.push("/demand")}>
+                <Button
+                  variant="link"
+                  className="text-blue-600 p-0 h-auto text-sm"
+                  onClick={() => router.push("/demand")}
+                >
                   View all
                 </Button>
               </div>
@@ -104,16 +106,20 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="slide-in" style={{ animationDelay: "0.2s" }}>
-            <CardContent className="p-6 text-center space-y-4">
-              <Package className="h-12 w-12 mx-auto text-green-600" />
-              <div>
-                <h3 className="text-xl font-semibold">Supply</h3>
-                <p className="text-sm text-gray-600 mt-1">Have services or products to offer?</p>
-                <div className="flex items-center justify-center mt-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+            <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
+              <Package className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-green-600" />
+              <div className="space-y-2">
+                <h3 className="text-lg sm:text-xl font-semibold">Supply</h3>
+                <p className="text-sm text-gray-600">Have services or products to offer?</p>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-green-600">Active 10</span>
                 </div>
-                <Button variant="link" className="text-blue-600 p-0 h-auto mt-2" onClick={() => router.push("/supply")}>
+                <Button
+                  variant="link"
+                  className="text-blue-600 p-0 h-auto text-sm"
+                  onClick={() => router.push("/supply")}
+                >
                   View all
                 </Button>
               </div>
@@ -135,10 +141,10 @@ export default function DashboardPage() {
                 style={{ animationDelay: `${0.3 + index * 0.1}s` }}
                 onClick={() => router.push(`/chat/${project.id}`)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
                         {project.status === "Draft" && (
                           <Badge variant="secondary" className="text-xs">
                             Draft
@@ -153,10 +159,12 @@ export default function DashboardPage() {
                           </Badge>
                         )}
                       </div>
-                      <h4 className="font-semibold">{project.title}</h4>
-                      <p className="text-sm text-gray-600">{project.matches || `Last edited: ${project.lastEdited}`}</p>
+                      <h4 className="font-semibold text-sm sm:text-base">{project.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        {project.matches || `Last edited: ${project.lastEdited}`}
+                      </p>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>

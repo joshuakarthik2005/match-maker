@@ -85,22 +85,24 @@ export default function SupplyPage() {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="container py-8">
+      <main className="container py-4 sm:py-8 px-2 sm:px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col gap-3 sm:gap-4">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight mb-2">Supplier Dashboard</h1>
-                <p className="text-xl text-muted-foreground">Manage your services and connect with buyers</p>
+                <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-1 sm:mb-2">Supplier Dashboard</h1>
+                <p className="text-base sm:text-xl text-muted-foreground">
+                  Manage your services and connect with buyers
+                </p>
               </div>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
@@ -113,7 +115,7 @@ export default function SupplyPage() {
             </Card>
 
             <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Connections</p>
@@ -126,7 +128,7 @@ export default function SupplyPage() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* My Listings */}
@@ -147,12 +149,17 @@ export default function SupplyPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {myListings.map((listing) => (
-                      <div key={listing.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div
+                        key={listing.id}
+                        className="border rounded-lg p-3 sm:p-4 hover:bg-muted/50 transition-colors"
+                      >
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{listing.title}</h3>
-                              {listing.featured && <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>}
+                            <div className="flex items-start gap-2 mb-1">
+                              <h3 className="font-semibold text-base sm:text-lg flex-1 min-w-0">{listing.title}</h3>
+                              {listing.featured && (
+                                <Badge className="bg-yellow-100 text-yellow-800 text-xs">Featured</Badge>
+                              )}
                             </div>
                             <div className="flex items-center gap-2 mb-2">
                               <Badge variant="secondary">{listing.category}</Badge>
@@ -207,19 +214,26 @@ export default function SupplyPage() {
                           </div>
                         </div>
 
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Created {listing.dateCreated}</span>
-                          <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                          <span className="text-xs sm:text-sm text-muted-foreground">
+                            Created {listing.dateCreated}
+                          </span>
+                          <div className="flex gap-2 w-full sm:w-auto">
                             <Button
                               variant="outline"
                               size="sm"
+                              className="flex-1 sm:flex-none text-xs sm:text-sm"
                               onClick={() => router.push(`/supply/${listing.id}/matches`)}
                             >
-                              <Users className="h-4 w-4 mr-2" />
-                              View Matches
+                              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                              Matches
                             </Button>
-                            <Button size="sm" onClick={() => router.push(`/supply/${listing.id}`)}>
-                              View Details
+                            <Button
+                              size="sm"
+                              className="flex-1 sm:flex-none text-xs sm:text-sm"
+                              onClick={() => router.push(`/supply/${listing.id}`)}
+                            >
+                              Details
                             </Button>
                           </div>
                         </div>

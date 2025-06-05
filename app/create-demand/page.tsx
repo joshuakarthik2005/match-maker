@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Send, Paperclip, Menu } from "lucide-react"
+import { Send, Paperclip, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Message {
@@ -131,20 +131,25 @@ export default function CreateDemandPage() {
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Header */}
-      <div className="bg-white p-3 flex items-center border-b">
-        <Menu className="h-6 w-6 mr-2" />
-        <h1 className="text-lg font-medium">Demand</h1>
+      <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+          <h1 className="text-lg font-medium">Create Demand</h1>
+        </div>
       </div>
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[80%] px-3 py-2 rounded-3xl whitespace-pre-line ${
+              className={`max-w-[80%] px-4 py-3 rounded-2xl whitespace-pre-line text-sm leading-relaxed ${
                 message.type === "user"
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-gray-200 text-gray-800 rounded-bl-none"
+                  ? "bg-blue-500 text-white rounded-br-md"
+                  : "bg-gray-100 text-gray-800 rounded-bl-md"
               }`}
             >
               {message.content}
@@ -155,24 +160,24 @@ export default function CreateDemandPage() {
       </div>
 
       {/* Input area */}
-      <div className="bg-white p-2 border-t">
-        <div className="flex items-center bg-gray-100 rounded-full">
-          <Button variant="ghost" size="icon" className="rounded-full text-gray-500">
-            <Paperclip className="h-5 w-5" />
+      <div className="bg-white border-t px-4 py-3">
+        <div className="flex items-center gap-2 bg-gray-50 rounded-full px-3 py-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700">
+            <Paperclip className="h-4 w-4" />
           </Button>
           <Input
             placeholder="Type your message..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-gray-500"
             disabled={isCompleted}
           />
           <Button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isCompleted}
             size="icon"
-            className="h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 mr-1"
+            className="h-8 w-8 rounded-full bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
           >
             <Send className="h-4 w-4 text-white" />
           </Button>
