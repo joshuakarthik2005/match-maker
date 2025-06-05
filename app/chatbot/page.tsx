@@ -582,6 +582,15 @@ export default function ChatbotPage() {
   const isComplete = currentStep === "complete" || currentStep === "supplyComplete"
   const quickHelpSuggestions = getQuickHelpSuggestions()
 
+  // Detect if mobile (tailwind: sm = 640px)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navigation />
@@ -598,26 +607,28 @@ export default function ChatbotPage() {
       </div>
 
       <div className="flex-1 flex p-4 gap-4">
-        {/* Quick Help Box */}
-        <div className="w-80 shrink-0">
-          <Card className="shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Quick Help</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {quickHelpSuggestions.map((suggestion, index) => (
-                <Button
-                  key={index}
-                  variant="ghost"
-                  className="w-full justify-start text-left h-auto p-0 hover:bg-transparent hover:underline"
-                  onClick={() => handleQuickHelpClick(suggestion)}
-                >
-                  <p className="text-base font-medium">{suggestion}</p>
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Quick Help Box - hidden on mobile */}
+        {(conversationType === "demand" || conversationType === "supply") && (
+          <div className="w-80 shrink-0 hidden sm:block">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">Quick Help</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {quickHelpSuggestions.map((suggestion, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start text-left h-auto p-0 hover:bg-transparent hover:underline"
+                    onClick={() => handleQuickHelpClick(suggestion)}
+                  >
+                    <p className="text-base font-medium">{suggestion}</p>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 flex flex-col">
