@@ -54,6 +54,10 @@ export default function DemandPage() {
     },
   ]
 
+  const handleEditDemand = (demandId: number) => {
+    router.push(`/edit-demand/${demandId}`)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -189,7 +193,7 @@ export default function DemandPage() {
                           {demand.responses} responses received
                         </span>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleEditDemand(demand.id)}>
                             Edit
                           </Button>
                           <Button size="sm" onClick={() => router.push(`/matches/${demand.id}`)}>
