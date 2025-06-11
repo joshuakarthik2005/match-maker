@@ -3,8 +3,9 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Navigation } from "@/components/navigation"
-import { Send, ArrowLeft, Paperclip } from "lucide-react"
+import { Send, ArrowLeft, Paperclip, Eye, Copy } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Message {
@@ -50,6 +51,8 @@ type ConversationStep =
   | "supplyLocation"
   | "supplyComplete"
 
+type RequestStatus = "draft" | "paused" | "active" | "closed"
+
 export default function ChatbotPage() {
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
@@ -57,6 +60,10 @@ export default function ChatbotPage() {
   const [conversationType, setConversationType] = useState<"demand" | "supply">("demand")
   const [demandData, setDemandData] = useState<DemandData>({})
   const [supplyData, setSupplyData] = useState<SupplyData>({})
+  const [showPreview, setShowPreview] = useState(false)
+  const [requestStatus, setRequestStatus] = useState<RequestStatus>("draft")
+  const [showStatusDialog, setShowStatusDialog] = useState(false)
+  const [statusDialogMessage, setStatusDialogMessage] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -243,11 +250,11 @@ export default function ChatbotPage() {
       "How do I specify delivery instructions?":
         "Include specific addresses, contact persons, delivery time preferences, and any special handling requirements like fragile items or security protocols.",
 
-      "How far in advance should I plan (demand)?":
+      "How far in advance should I plan?":
         "Plan at least 1-2 weeks in advance for standard products, and 4-6 weeks for custom or specialized items. This gives suppliers time to prepare and ensures better pricing.",
       "What if I need it urgently?":
         "For urgent requests, be prepared to pay premium rates and have limited supplier options. Clearly communicate your urgency and be flexible on other requirements.",
-      "Can I set multiple possible dates?":
+      "Should I give myself buffer time?":
         "Yes, providing multiple acceptable dates increases your chances of finding available suppliers and may result in better pricing.",
       "What if my date is flexible?":
         "Flexible dates often result in better pricing as suppliers can optimize their schedules. Mention your flexibility to get more competitive offers.",
@@ -289,13 +296,13 @@ export default function ChatbotPage() {
       "How do I stay competitive with pricing?":
         "Monitor market rates regularly, focus on value over price, improve your skills to justify higher rates, and consider offering unique services or faster delivery.",
 
-      "How many dates should I provide?":
+      "How should I set my delivery timeline?":
         "Provide at least 3-5 available dates over the next 2-4 weeks. This gives clients flexibility while showing your availability.",
-      "Should I include weekends?":
+      "Should I include buffer time?":
         "Include weekends if you're willing to work them, as this can be a competitive advantage. Many clients appreciate weekend availability for urgent projects.",
-      "What if my availability changes?":
+      "What if I can deliver earlier?":
         "Update your available dates regularly to keep them current. Clients appreciate accurate, up-to-date availability information.",
-      "How far in advance should I plan (supply)?":
+      "How do I handle rush orders?":
         "Plan your availability 2-4 weeks in advance. This helps with scheduling and shows clients you're organized and professional.",
 
       "Does my location matter for services?":
@@ -321,6 +328,62 @@ export default function ChatbotPage() {
 
   const handleQuickHelpClick = (suggestion: string) => {
     setInput(suggestion)
+  }
+
+  const generateSummary = (): string => {
+    if (conversationType === "demand") {
+      const { product, quantity, itemType, budget, location, requiredDate } = demandData
+      return `I am looking to purchase ${quantity || "some"} ${product || "product"} of ${itemType || "type"} for ₹${budget || "budget"}. I need this by ${requiredDate || "date"} and can pick up from ${location || "location"}.`
+    } else {
+      const { service, experience, portfolio, pricing, availableDates, location } = supplyData
+      return `I offer ${service || "service"} with ${experience || "experience"} years of experience. My portfolio includes ${portfolio || "portfolio details"}. My pricing is ${pricing || "pricing details"}. I can deliver by ${availableDates?.join(", ") || "available dates"} and I'm located in ${location || "location"}.`
+    }
+  }
+
+  const getStatusColor = (status: RequestStatus): string => {
+    switch (status) {
+      case "draft":
+        return "text-blue-500"
+      case "paused":
+        return "text-orange-500"
+      case "active":
+        return "text-green-500"
+      case "closed":
+        return "text-gray-500"
+      default:
+        return "text-gray-500"
+    }
+  }
+
+  const handleStatusAction = (action: "save" | "submit" | "pause" | "close" | "cancel") => {
+    switch (action) {
+      case "save":
+        setRequestStatus("paused")
+        setStatusDialogMessage("Your request has been saved as draft.")
+        setShowStatusDialog(true)
+        setShowPreview(false)
+        break
+      case "submit":
+        setRequestStatus("active")
+        setShowPreview(false)
+        // Handle actual submission logic here
+        break
+      case "pause":
+        setRequestStatus("paused")
+        setStatusDialogMessage("Your request has been paused.")
+        setShowStatusDialog(true)
+        setShowPreview(false)
+        break
+      case "close":
+        setRequestStatus("closed")
+        setStatusDialogMessage("Your request has been closed.")
+        setShowStatusDialog(true)
+        setShowPreview(false)
+        break
+      case "cancel":
+        setShowPreview(false)
+        break
+    }
   }
 
   const handleSendMessage = () => {
@@ -581,6 +644,10 @@ export default function ChatbotPage() {
 
   const isComplete = currentStep === "complete" || currentStep === "supplyComplete"
   const quickHelpSuggestions = getQuickHelpSuggestions()
+  const hasEnoughDataForPreview =
+    conversationType === "demand"
+      ? demandData.product || demandData.quantity || demandData.itemType
+      : supplyData.service || supplyData.experience || supplyData.portfolio
 
   // Detect if mobile (tailwind: sm = 640px)
   const [isMobile, setIsMobile] = useState(false)
@@ -596,14 +663,26 @@ export default function ChatbotPage() {
       <Navigation />
 
       {/* Header */}
-      <div className="bg-white border-b px-4 py-3 flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <h1 className="text-lg font-semibold">{conversationType === "demand" ? "Create Demand" : "Create Supply"}</h1>
+      <div className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <h1 className="text-lg font-semibold">
+              {conversationType === "demand" ? "Create Demand" : "Create Supply"}
+            </h1>
+          </div>
         </div>
+
+        {/* Preview Button */}
+        {hasEnoughDataForPreview && (
+          <Button variant="outline" size="sm" onClick={() => setShowPreview(true)} className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            Preview
+          </Button>
+        )}
       </div>
 
       <div className="flex-1 flex p-4 gap-4">
@@ -619,10 +698,10 @@ export default function ChatbotPage() {
                   <Button
                     key={index}
                     variant="ghost"
-                    className="w-full justify-start text-left h-auto p-0 hover:bg-transparent hover:underline"
+                    className="w-full justify-start text-left h-auto p-0 hover:bg-transparent hover:underline whitespace-normal"
                     onClick={() => handleQuickHelpClick(suggestion)}
                   >
-                    <p className="text-base font-medium">{suggestion}</p>
+                    <p className="text-base font-medium break-words">{suggestion}</p>
                   </Button>
                 ))}
               </CardContent>
@@ -703,6 +782,89 @@ export default function ChatbotPage() {
           )}
         </div>
       </div>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <DialogTitle>Preview</DialogTitle>
+            <div className={`text-sm font-medium ${getStatusColor(requestStatus)}`}>Status: {requestStatus}</div>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-3">
+                {conversationType === "demand" ? "Demand Summary" : "Supply Summary"}
+              </h3>
+
+              <div className="relative border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                <p className="text-sm text-gray-700 leading-relaxed">{generateSummary()}</p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 h-6 w-6"
+                  onClick={() => navigator.clipboard.writeText(generateSummary())}
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {requestStatus === "draft" && (
+                <>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => handleStatusAction("save")}>
+                      Save for later
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handleStatusAction("cancel")}>
+                      Cancel
+                    </Button>
+                  </div>
+                  <Button
+                    className="w-full bg-green-500 hover:bg-green-600"
+                    onClick={() => handleStatusAction("submit")}
+                  >
+                    Submit
+                  </Button>
+                </>
+              )}
+
+              {requestStatus === "active" && (
+                <div className="flex gap-2">
+                  <Button className="flex-1 bg-blue-500 hover:bg-blue-600" onClick={() => handleStatusAction("pause")}>
+                    Pause
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => handleStatusAction("close")}>
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {(requestStatus === "paused" || requestStatus === "closed") && (
+                <Button variant="outline" className="w-full" onClick={() => handleStatusAction("cancel")}>
+                  Close Preview
+                </Button>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Status Dialog */}
+      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
+        <DialogContent className="sm:max-w-sm">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold">
+              {requestStatus === "paused" ? "Saved" : requestStatus === "closed" ? "Closed" : "Status Updated"}
+            </h3>
+            <p className="text-sm text-gray-600">{statusDialogMessage}</p>
+            <Button className="w-full" onClick={() => setShowStatusDialog(false)}>
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
