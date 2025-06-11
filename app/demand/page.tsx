@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { Search, DollarSign, MapPin, Clock, Users, TrendingUp } from "lucide-react"
+import { Search, DollarSign, MapPin, Clock, Users, TrendingUp, Plus } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
 
@@ -68,6 +68,16 @@ export default function DemandPage() {
                 <p className="text-xl text-muted-foreground">
                   Post your requirements and connect with verified suppliers
                 </p>
+                <Button
+                  className="mt-4"
+                  onClick={() => {
+                    sessionStorage.setItem("chatbot-context", "/demand")
+                    router.push("/chatbot")
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Demand
+                </Button>
               </div>
             </div>
           </div>
