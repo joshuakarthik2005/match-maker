@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { DollarSign, Eye, MessageSquare, Star, MoreHorizontal, Users } from "lucide-react"
+import { DollarSign, Eye, MessageSquare, Star, MoreHorizontal, Users, Plus } from "lucide-react"
 import { SimpleSelect, SimpleSelectItem } from "@/components/ui/simple-select"
 import { useRouter } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -96,6 +96,16 @@ export default function SupplyPage() {
                   Manage your services and connect with buyers
                 </p>
               </div>
+              <Button
+                className="mt-4"
+                onClick={() => {
+                  sessionStorage.setItem("chatbot-context", "/supply")
+                  router.push("/chatbot")
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Supply
+              </Button>
             </div>
           </div>
 
