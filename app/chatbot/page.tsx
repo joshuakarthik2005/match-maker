@@ -355,7 +355,7 @@ export default function ChatbotPage() {
     }
   }
 
-  const handleStatusAction = (action: "save" | "submit" | "pause" | "close" | "cancel") => {
+  const handleStatusAction = (action: "save" | "submit" | "pause" | "close" | "cancel" | "resume") => {
     switch (action) {
       case "save":
         setRequestStatus("paused")
@@ -381,6 +381,12 @@ export default function ChatbotPage() {
         setShowPreview(false)
         break
       case "cancel":
+        setShowPreview(false)
+        break
+      case "resume":
+        setRequestStatus("active")
+        setStatusDialogMessage("Your request has been resumed and is now active.")
+        setShowStatusDialog(true)
         setShowPreview(false)
         break
     }
@@ -644,12 +650,6 @@ export default function ChatbotPage() {
 
   const isComplete = currentStep === "complete" || currentStep === "supplyComplete"
   const quickHelpSuggestions = getQuickHelpSuggestions()
-  const hasEnoughDataForPreview =
-    conversationType === "demand"
-      ? demandData.product || demandData.quantity || demandData.itemType
-      : supplyData.service || supplyData.experience || supplyData.portfolio
-
-  // Detect if mobile (tailwind: sm = 640px)
   const [isMobile, setIsMobile] = useState(false)
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640)
@@ -676,13 +676,11 @@ export default function ChatbotPage() {
           </div>
         </div>
 
-        {/* Preview Button */}
-        {hasEnoughDataForPreview && (
-          <Button variant="outline" size="sm" onClick={() => setShowPreview(true)} className="flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            Preview
-          </Button>
-        )}
+        {/* Preview Button - Always visible */}
+        <Button variant="outline" size="sm" onClick={() => setShowPreview(true)} className="flex items-center gap-2">
+          <Eye className="h-4 w-4" />
+          Preview
+        </Button>
       </div>
 
       <div className="flex-1 flex p-4 gap-4">
@@ -841,7 +839,21 @@ export default function ChatbotPage() {
                 </div>
               )}
 
-              {(requestStatus === "paused" || requestStatus === "closed") && (
+              {requestStatus === "paused" && (
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1 bg-green-500 hover:bg-green-600"
+                    onClick={() => handleStatusAction("resume")}
+                  >
+                    Resume
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => handleStatusAction("close")}>
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {requestStatus === "closed" && (
                 <Button variant="outline" className="w-full" onClick={() => handleStatusAction("cancel")}>
                   Close Preview
                 </Button>
