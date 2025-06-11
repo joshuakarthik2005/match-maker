@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Navigation } from "@/components/navigation"
-import { ShoppingCart, Package, ChevronRight, Plus, ChevronDown } from "lucide-react"
+import { ShoppingCart, Package, ChevronRight, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { SimpleDropdown, SimpleDropdownItem } from "@/components/ui/simple-dropdown"
+// import { SimpleDropdown, SimpleDropdownItem } from "@/components/ui/simple-dropdown"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -63,7 +63,7 @@ export default function DashboardPage() {
             <p className="text-sm sm:text-base text-gray-600">What would you like to do today?</p>
           </div>
 
-          <SimpleDropdown
+          {/* <SimpleDropdown
             trigger={
               <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
@@ -80,7 +80,7 @@ export default function DashboardPage() {
               <Package className="mr-2 h-4 w-4" />
               Create Supply
             </SimpleDropdownItem>
-          </SimpleDropdown>
+          </SimpleDropdown> */}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -100,6 +100,10 @@ export default function DashboardPage() {
                   onClick={() => router.push("/demand")}
                 >
                   View all
+                </Button>
+                <Button className="w-full mt-2" onClick={handleCreateDemand}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Demand
                 </Button>
               </div>
             </CardContent>
@@ -121,6 +125,10 @@ export default function DashboardPage() {
                   onClick={() => router.push("/supply")}
                 >
                   View all
+                </Button>
+                <Button className="w-full mt-2" onClick={handleCreateSupply}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Supply
                 </Button>
               </div>
             </CardContent>
