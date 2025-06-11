@@ -520,6 +520,24 @@ export default function ChatbotPage() {
         nextStep = "requiredDate"
         break
       case "requiredDate":
+        // Validate date is not in the past
+        const inputDate = new Date(userInput)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0) // Reset time to start of day for comparison
+
+        if (inputDate < today) {
+          setTimeout(() => {
+            const errorMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: "Please provide a future date. Past dates are not allowed.",
+              sender: "bot",
+              timestamp: new Date(),
+            }
+            setMessages((prev) => [...prev, errorMessage])
+          }, 1000)
+          return
+        }
+
         setDemandData((prev) => ({ ...prev, requiredDate: userInput }))
         showDemandSummary(userInput)
         nextStep = "complete"
@@ -565,8 +583,29 @@ export default function ChatbotPage() {
         nextStep = "availableDates"
         break
       case "availableDates":
-        // Parse the dates from user input
+        // Parse and validate dates
         const dates = userInput.split(",").map((date) => date.trim())
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const hasInvalidDates = dates.some((dateStr) => {
+          const date = new Date(dateStr)
+          return date < today
+        })
+
+        if (hasInvalidDates) {
+          setTimeout(() => {
+            const errorMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: "Please provide future dates only. Past dates are not allowed.",
+              sender: "bot",
+              timestamp: new Date(),
+            }
+            setMessages((prev) => [...prev, errorMessage])
+          }, 1000)
+          return
+        }
+
         setSupplyData((prev) => ({ ...prev, availableDates: dates }))
         botResponse = "Where are you located?"
         nextStep = "supplyLocation"
@@ -713,7 +752,7 @@ export default function ChatbotPage() {
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                  className={`max-w-[80%] px-4 py-2 rounded-2xl break-words ${
                     message.sender === "user"
                       ? message.isHelpMessage
                         ? "bg-green-500 text-white rounded-br-md"
@@ -725,7 +764,7 @@ export default function ChatbotPage() {
                           : "bg-gray-200 text-gray-800 rounded-bl-md"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-sm">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
                 </div>
               </div>
             ))}
